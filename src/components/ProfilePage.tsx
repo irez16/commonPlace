@@ -13,7 +13,7 @@ export default function ProfilePage() {
   // strip the "@" ourselves before using it as the username to look up.
   const { handle } = useParams<{ handle: string }>();
   const username = handle?.startsWith('@') ? handle.slice(1) : undefined;
-  const { loading, notFound, error, profile, isOwnProfile } = usePublicProfile(username);
+  const { loading, notFound, error, profile, isOwnProfile, viewerId } = usePublicProfile(username);
   const [liveProfile, setLiveProfile] = useState<Profile | null>(null);
 
   if (username && loading) return <p>Loading profile…</p>;
@@ -39,6 +39,7 @@ export default function ProfilePage() {
       <ProfileHeader
         profile={displayedProfile}
         isOwnProfile={isOwnProfile}
+        viewerId={viewerId}
         onProfileUpdated={setLiveProfile}
       />
 

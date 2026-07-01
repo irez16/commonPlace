@@ -42,6 +42,12 @@ export interface Profile {
   created_at: string;
 }
 
+export interface Follow {
+  follower_id: string;
+  followee_id: string;
+  created_at: string;
+}
+
 export interface WantToConsumeItem {
   id: string;
   user_id: string;

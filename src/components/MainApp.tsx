@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useFollowCounts } from '../hooks/useFollowCounts';
 import AddLedgerEntry from './AddLedgerEntry';
 import LedgerList from './LedgerList';
 import AddWantToConsume from './AddWantToConsume';
@@ -14,6 +15,7 @@ interface MainAppProps {
 export default function MainApp({ userId, username }: MainAppProps) {
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
+  const { loading: countsLoading, followerCount, followingCount } = useFollowCounts(userId);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -26,6 +28,16 @@ export default function MainApp({ userId, username }: MainAppProps) {
         Log out
       </button>
       {username && <Link to={`/@${username}`}>View your profile</Link>}
+
+      <div>
+        <Link to="/following">
+          Following{!countsLoading && ` (${followingCount})`}
+        </Link>
+        {' · '}
+        <Link to="/followers">
+          Followers{!countsLoading && ` (${followerCount})`}
+        </Link>
+      </div>
 
       <AddLedgerEntry
         userId={userId}

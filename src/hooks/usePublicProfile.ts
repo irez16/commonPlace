@@ -8,6 +8,7 @@ interface PublicProfileState {
   error: string | null;
   profile: Profile | null;
   isOwnProfile: boolean;
+  viewerId: string | null;
 }
 
 // Looks up a profile by username. Deliberately does NOT fetch ledger or
@@ -20,6 +21,7 @@ export function usePublicProfile(username: string | undefined): PublicProfileSta
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [viewerId, setViewerId] = useState<string | null>(null);
 
   const fetchProfile = useCallback(async () => {
     if (!username) {
@@ -59,11 +61,12 @@ export function usePublicProfile(username: string | undefined): PublicProfileSta
     setLoading(false);
     setProfile(typedProfile);
     setIsOwnProfile(currentUser?.id === typedProfile.id);
+    setViewerId(currentUser?.id ?? null);
   }, [username]);
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
-  return { loading, notFound, error, profile, isOwnProfile };
+  return { loading, notFound, error, profile, isOwnProfile, viewerId };
 }

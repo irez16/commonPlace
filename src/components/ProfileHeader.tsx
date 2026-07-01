@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import FollowButton from './FollowButton';
 import type { Profile } from '../types';
 
 interface ProfileHeaderProps {
   profile: Profile;
   isOwnProfile: boolean;
+  viewerId: string | null;
   onProfileUpdated: (updated: Profile) => void;
 }
 
@@ -18,6 +20,7 @@ interface EditDraft {
 export default function ProfileHeader({
   profile,
   isOwnProfile,
+  viewerId,
   onProfileUpdated,
 }: ProfileHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -123,13 +126,15 @@ export default function ProfileHeader({
       <p>@{profile.username}</p>
       {profile.currently && <p>Currently: {profile.currently}</p>}
       {profile.bio && <p>{profile.bio}</p>}
-      {isOwnProfile && (
+      {isOwnProfile ? (
         <div>
           <button type="button" onClick={startEdit}>
             Edit profile
           </button>
           <Link to="/">Go to dashboard</Link>
         </div>
+      ) : (
+        <FollowButton viewerId={viewerId} targetUserId={profile.id} />
       )}
     </div>
   );
