@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import AddLedgerEntry from './AddLedgerEntry';
 import LedgerList from './LedgerList';
@@ -7,9 +8,10 @@ import WantToConsumeList from './WantToConsumeList';
 
 interface MainAppProps {
   userId: string;
+  username: string | null;
 }
 
-export default function MainApp({ userId }: MainAppProps) {
+export default function MainApp({ userId, username }: MainAppProps) {
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
 
@@ -23,6 +25,7 @@ export default function MainApp({ userId }: MainAppProps) {
       <button type="button" onClick={handleLogout}>
         Log out
       </button>
+      {username && <Link to={`/@${username}`}>View your profile</Link>}
 
       <AddLedgerEntry
         userId={userId}

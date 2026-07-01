@@ -6,15 +6,17 @@ interface ProfileStatus {
   loading: boolean;
   user: User | null;
   hasProfile: boolean;
+  username: string | null;
 }
 
-// Returns { loading, user, hasProfile }
+// Returns { loading, user, hasProfile, username }
 // Use this at the app root to decide whether to route someone into the
 // "complete your profile" step rather than the main app.
 export function useProfileStatus(): ProfileStatus {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -29,13 +31,14 @@ export function useProfileStatus(): ProfileStatus {
       if (!currentUser) {
         setUser(null);
         setHasProfile(false);
+        setUsername(null);
         setLoading(false);
         return;
       }
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, username')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -43,6 +46,7 @@ export function useProfileStatus(): ProfileStatus {
 
       setUser(currentUser);
       setHasProfile(!!profile);
+      setUsername(profile?.username ?? null);
       setLoading(false);
     };
 
@@ -60,5 +64,5 @@ export function useProfileStatus(): ProfileStatus {
     };
   }, []);
 
-  return { loading, user, hasProfile };
+  return { loading, user, hasProfile, username };
 }

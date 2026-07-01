@@ -5,7 +5,7 @@ import Login from './Login';
 import MainApp from './MainApp';
 
 export default function Dashboard() {
-  const { loading, user, hasProfile } = useProfileStatus();
+  const { loading, user, hasProfile, username } = useProfileStatus();
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
 
   if (loading) return <p>Loading…</p>;
@@ -39,5 +39,5 @@ export default function Dashboard() {
   }
 
   // Logged in with a complete profile → real app
-  return <MainApp userId={user.id} />;
+  return <MainApp userId={user.id} username={username} />;
 }
