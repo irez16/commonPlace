@@ -6,6 +6,7 @@ interface WantToConsumeListProps {
   userId: string;
   refreshKey: number;
   onPromoted?: () => void;
+  readOnly?: boolean;
 }
 
 interface PromoteDraft {
@@ -18,6 +19,7 @@ export default function WantToConsumeList({
   userId,
   refreshKey,
   onPromoted,
+  readOnly = false,
 }: WantToConsumeListProps) {
   const [items, setItems] = useState<WantToConsumeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,12 @@ export default function WantToConsumeList({
       return;
     }
 
-    setItems(data as WantToConsumeItem[]);
-  }, [userId]);
+    const fetched = data as WantToConsumeItem[];
+    // Public profile view: only ever show public items, even if the viewer
+    // happens to be the owner (RLS would otherwise let their own private
+    // items through too).
+    setItems(readOnly ? fetched.filter((item) => item.is_public) : fetched);
+  }, [userId, readOnly]);
 
   useEffect(() => {
     fetchItems();
@@ -131,9 +137,11 @@ export default function WantToConsumeList({
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  if (loading) return <p>Loading your list…</p>;
+  if (loading) return <p>Loading {readOnly ? 'list' : 'your list'}…</p>;
   if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
-  if (items.length === 0) return <p>Nothing on your Want to Consume list yet.</p>;
+  if (items.length === 0) {
+    return <p>Nothing on {readOnly ? 'the' : 'your'} Want to Consume list yet.</p>;
+  }
 
   return (
     <ul>
@@ -155,7 +163,7 @@ export default function WantToConsumeList({
               </a>
             )}
 
-            {isPromoting ? (
+            {readOnly ? null : isPromoting ? (
               <div>
                 <p>How was it?</p>
                 <label>

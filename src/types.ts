@@ -29,6 +29,19 @@ export interface LedgerEntry {
   updated_at: string;
 }
 
+export interface Profile {
+  id: string;
+  username: string;
+  name: string;
+  currently: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  journal_cover_color: string | null;
+  journal_font: string | null;
+  journal_layout: string | null;
+  created_at: string;
+}
+
 export interface WantToConsumeItem {
   id: string;
   user_id: string;

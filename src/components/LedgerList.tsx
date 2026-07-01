@@ -6,6 +6,7 @@ import type { MediaType, LedgerEntry } from '../types';
 interface LedgerListProps {
   userId: string;
   refreshKey: number;
+  readOnly?: boolean;
 }
 
 interface EditDraft {
@@ -18,7 +19,7 @@ interface EditDraft {
   note: string;
 }
 
-export default function LedgerList({ userId, refreshKey }: LedgerListProps) {
+export default function LedgerList({ userId, refreshKey, readOnly = false }: LedgerListProps) {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,14 +129,16 @@ export default function LedgerList({ userId, refreshKey }: LedgerListProps) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
-  if (loading) return <p>Loading your ledger…</p>;
+  if (loading) return <p>Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
   if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
-  if (entries.length === 0) return <p>Nothing in your ledger yet.</p>;
+  if (entries.length === 0) {
+    return <p>Nothing in {readOnly ? 'the' : 'your'} ledger yet.</p>;
+  }
 
   return (
     <ul>
       {entries.map((entry) => {
-        const isEditing = editingId === entry.id;
+        const isEditing = !readOnly && editingId === entry.id;
 
         if (isEditing && editDraft) {
           return (
@@ -227,18 +230,20 @@ export default function LedgerList({ userId, refreshKey }: LedgerListProps) {
                 View source
               </a>
             )}
-            <div>
-              <button type="button" onClick={() => startEdit(entry)}>
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => deleteEntry(entry.id)}
-                disabled={deletingId === entry.id}
-              >
-                {deletingId === entry.id ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
+            {!readOnly && (
+              <div>
+                <button type="button" onClick={() => startEdit(entry)}>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteEntry(entry.id)}
+                  disabled={deletingId === entry.id}
+                >
+                  {deletingId === entry.id ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            )}
           </li>
         );
       })}
