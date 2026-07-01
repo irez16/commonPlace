@@ -6,7 +6,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
-      <Route path="/@:username" element={<ProfilePage />} />
+      <Route path="/:handle" element={<ProfilePage />} />
     </Routes>
   );
 }

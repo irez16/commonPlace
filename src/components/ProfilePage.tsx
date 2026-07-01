@@ -7,18 +7,21 @@ import WantToConsumeList from './WantToConsumeList';
 import type { Profile } from '../types';
 
 export default function ProfilePage() {
-  // useParams reads whatever the router captured from the URL. Our route
-  // is defined as "/@:username", so this pulls out just the "username" part.
-  const { username } = useParams<{ username: string }>();
+  // React Router params must be a whole path segment — it can't mix a
+  // literal "@" with a param within the same segment. So the route is
+  // "/:handle" and we capture the whole thing (e.g. "@iRezonate"), then
+  // strip the "@" ourselves before using it as the username to look up.
+  const { handle } = useParams<{ handle: string }>();
+  const username = handle?.startsWith('@') ? handle.slice(1) : undefined;
   const { loading, notFound, error, profile, isOwnProfile } = usePublicProfile(username);
   const [liveProfile, setLiveProfile] = useState<Profile | null>(null);
 
-  if (loading) return <p>Loading profile…</p>;
+  if (username && loading) return <p>Loading profile…</p>;
 
-  if (notFound) {
+  if (!username || notFound) {
     return (
       <div>
-        <p>No profile found for @{username}.</p>
+        <p>No profile found for {handle}.</p>
         <Link to="/">Go home</Link>
       </div>
     );
