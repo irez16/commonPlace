@@ -28,6 +28,8 @@ export default function MainApp({ userId }: MainAppProps) {
       </button>
 
       <div>
+        <Link to="/feed">Feed</Link>
+        {' · '}
         <Link to="/following">
           Following{!countsLoading && ` (${followingCount})`}
         </Link>
