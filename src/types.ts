@@ -58,5 +58,6 @@ export interface WantToConsumeItem {
   note: string | null;
   is_public: boolean;
   promoted_ledger_entry_id: string | null;
+  source_ledger_entry_id: string | null;
   created_at: string;
 }

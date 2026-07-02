@@ -22,8 +22,7 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
       .from('want_to_consume')
       .select('id')
       .eq('user_id', viewerId)
-      .eq('title', entry.title)
-      .eq('media_type', entry.media_type)
+      .eq('source_ledger_entry_id', entry.id)
       .maybeSingle();
 
     setLoading(false);
@@ -34,7 +33,7 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
     }
 
     setIsSaved(!!data);
-  }, [viewerId, entry.title, entry.media_type]);
+  }, [viewerId, entry.id]);
 
   useEffect(() => {
     checkStatus();
@@ -52,6 +51,7 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
       url: entry.url,
       note: null,
       is_public: true,
+      source_ledger_entry_id: entry.id,
     });
 
     setWorking(false);
