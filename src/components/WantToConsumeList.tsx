@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { WantToConsumeItem } from '../types';
 
@@ -7,13 +7,6 @@ interface WantToConsumeListProps {
   refreshKey: number;
   onPromoted?: () => void;
   readOnly?: boolean;
-  // The currently pinned item's id (lives on the profile, not the item —
-  // only one item can ever be pinned at a time). Undefined/null means
-  // nothing is pinned.
-  pinnedId?: string | null;
-  // Called with the new pinned id (or null) whenever the pin changes —
-  // including implicitly, when the pinned item is promoted or removed.
-  onPinnedChanged?: (id: string | null) => void;
 }
 
 interface PromoteDraft {
@@ -23,9 +16,7 @@ interface PromoteDraft {
 }
 
 // How many items show in the default, non-expanded preview (view mode
-// only). Kept as a fixed size — pinned item included, if there is one —
-// so the section's height doesn't shift depending on whether something's
-// pinned.
+// only) — the most recent additions, plain reverse-chronological.
 const PREVIEW_SIZE = 5;
 
 export default function WantToConsumeList({
@@ -33,8 +24,6 @@ export default function WantToConsumeList({
   refreshKey,
   onPromoted,
   readOnly = false,
-  pinnedId = null,
-  onPinnedChanged,
 }: WantToConsumeListProps) {
   const [items, setItems] = useState<WantToConsumeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +31,6 @@ export default function WantToConsumeList({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [promoteDraftId, setPromoteDraftId] = useState<string | null>(null);
-  const [pinningId, setPinningId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [promoteDraft, setPromoteDraft] = useState<PromoteDraft>({
     consumed_date: new Date().toISOString().slice(0, 10),
@@ -84,17 +72,7 @@ export default function WantToConsumeList({
     setExpanded(false);
   }, [readOnly]);
 
-  // Pinned item (if present in this filtered set) always sorts first;
-  // everything else stays reverse-chronological.
-  const orderedItems = useMemo(() => {
-    if (!pinnedId) return items;
-    const pinned = items.find((i) => i.id === pinnedId);
-    if (!pinned) return items;
-    return [pinned, ...items.filter((i) => i.id !== pinnedId)];
-  }, [items, pinnedId]);
-
-  const visibleItems =
-    readOnly && !expanded ? orderedItems.slice(0, PREVIEW_SIZE) : orderedItems;
+  const visibleItems = readOnly && !expanded ? items.slice(0, PREVIEW_SIZE) : items;
 
   const openPromoteForm = (item: WantToConsumeItem) => {
     setPromoteDraftId(item.id);
@@ -148,12 +126,6 @@ export default function WantToConsumeList({
     }
 
     setItems((prev) => prev.filter((i) => i.id !== item.id));
-    // The pin lives on the profile row, so deleting the pinned item here
-    // clears it server-side (on delete set null) — but our local pinnedId
-    // prop won't know that without this. Left empty on purpose: the spec
-    // is "stays empty until you deliberately pin something else," not
-    // auto-selecting a new favorite.
-    if (item.id === pinnedId) onPinnedChanged?.(null);
     onPromoted?.();
   };
 
@@ -176,29 +148,6 @@ export default function WantToConsumeList({
     }
 
     setItems((prev) => prev.filter((i) => i.id !== id));
-    if (id === pinnedId) onPinnedChanged?.(null);
-  };
-
-  const togglePin = async (item: WantToConsumeItem) => {
-    const isCurrentlyPinned = pinnedId === item.id;
-    const newPinnedId = isCurrentlyPinned ? null : item.id;
-
-    setPinningId(item.id);
-    setError(null);
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ pinned_want_to_consume_id: newPinnedId })
-      .eq('id', userId);
-
-    setPinningId(null);
-
-    if (updateError) {
-      setError(updateError.message);
-      return;
-    }
-
-    onPinnedChanged?.(newPinnedId);
   };
 
   if (loading) return <p>Loading {readOnly ? 'list' : 'your list'}…</p>;
@@ -212,11 +161,9 @@ export default function WantToConsumeList({
       <ul>
         {visibleItems.map((item) => {
           const isPromoting = promoteDraftId === item.id;
-          const isPinned = pinnedId === item.id;
 
           return (
             <li key={item.id}>
-              {isPinned && <span aria-label="Pinned">📌 </span>}
               <strong>{item.title}</strong>
               {item.creator && ` — ${item.creator}`}
               <div>
@@ -280,14 +227,6 @@ export default function WantToConsumeList({
                 </div>
               ) : (
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => togglePin(item)}
-                    disabled={pinningId === item.id}
-                    aria-pressed={isPinned}
-                  >
-                    {pinningId === item.id ? '…' : isPinned ? 'Unpin' : 'Pin'}
-                  </button>
                   <button type="button" onClick={() => openPromoteForm(item)}>
                     Mark as consumed
                   </button>
@@ -304,7 +243,7 @@ export default function WantToConsumeList({
           );
         })}
       </ul>
-      {readOnly && !expanded && orderedItems.length > PREVIEW_SIZE && (
+      {readOnly && !expanded && items.length > PREVIEW_SIZE && (
         <button type="button" onClick={() => setExpanded(true)}>
           See all
         </button>

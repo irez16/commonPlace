@@ -100,10 +100,6 @@ export default function ProfilePage() {
         refreshKey={wantRefreshKey}
         readOnly={!contentEditable}
         onPromoted={() => setLedgerRefreshKey((k) => k + 1)}
-        pinnedId={displayedProfile.pinned_want_to_consume_id}
-        onPinnedChanged={(id) =>
-          setLiveProfile({ ...displayedProfile, pinned_want_to_consume_id: id })
-        }
       />
     </div>
   );
