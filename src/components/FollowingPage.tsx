@@ -20,7 +20,7 @@ export default function FollowingPage() {
   return (
     <div>
       <h1>Following</h1>
-      <Link to="/">Back to dashboard</Link>
+      <Link to="/">Back to your profile</Link>
       {profiles.length === 0 ? (
         <p>You're not following anyone yet.</p>
       ) : (

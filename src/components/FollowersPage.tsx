@@ -20,7 +20,7 @@ export default function FollowersPage() {
   return (
     <div>
       <h1>Followers</h1>
-      <Link to="/">Back to dashboard</Link>
+      <Link to="/">Back to your profile</Link>
       {profiles.length === 0 ? (
         <p>No followers yet.</p>
       ) : (

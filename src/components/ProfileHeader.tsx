@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useFollowCounts } from '../hooks/useFollowCounts';
 import FollowButton from './FollowButton';
 import type { Profile } from '../types';
 
@@ -27,6 +28,14 @@ export default function ProfileHeader({
   const [draft, setDraft] = useState<EditDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { loading: countsLoading, followerCount, followingCount } = useFollowCounts(
+    isOwnProfile ? profile.id : undefined
+  );
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   const startEdit = () => {
     setDraft({
@@ -128,10 +137,21 @@ export default function ProfileHeader({
       {profile.bio && <p>{profile.bio}</p>}
       {isOwnProfile ? (
         <div>
+          <div>
+            <Link to="/following">
+              Following{!countsLoading && ` (${followingCount})`}
+            </Link>
+            {' · '}
+            <Link to="/followers">
+              Followers{!countsLoading && ` (${followerCount})`}
+            </Link>
+          </div>
           <button type="button" onClick={startEdit}>
             Edit profile
           </button>
-          <Link to="/">Go to dashboard</Link>
+          <button type="button" onClick={handleLogout}>
+            Log out
+          </button>
         </div>
       ) : (
         <FollowButton viewerId={viewerId} targetUserId={profile.id} />

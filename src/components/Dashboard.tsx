@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import SignUp from './SignUp';
 import Login from './Login';
-import MainApp from './MainApp';
 
 export default function Dashboard() {
-  const { loading, user, hasProfile } = useProfileStatus();
+  const { loading, user, hasProfile, username } = useProfileStatus();
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
 
   if (loading) return <p>Loading…</p>;
@@ -38,6 +38,8 @@ export default function Dashboard() {
     return <SignUp startAtProfileStep onComplete={() => window.location.reload()} />;
   }
 
-  // Logged in with a complete profile → real app
-  return <MainApp userId={user.id} />;
+  // Logged in with a complete profile → there's no separate "dashboard"
+  // view anymore. Your own /@username page IS the app; it just has an
+  // Edit toggle you and only you can see.
+  return <Navigate to={`/@${username}`} replace />;
 }
