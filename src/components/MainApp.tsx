@@ -9,10 +9,9 @@ import WantToConsumeList from './WantToConsumeList';
 
 interface MainAppProps {
   userId: string;
-  username: string | null;
 }
 
-export default function MainApp({ userId, username }: MainAppProps) {
+export default function MainApp({ userId }: MainAppProps) {
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
   const { loading: countsLoading, followerCount, followingCount } = useFollowCounts(userId);
@@ -27,7 +26,6 @@ export default function MainApp({ userId, username }: MainAppProps) {
       <button type="button" onClick={handleLogout}>
         Log out
       </button>
-      {username && <Link to={`/@${username}`}>View your profile</Link>}
 
       <div>
         <Link to="/following">
