@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
@@ -7,6 +7,12 @@ interface LedgerListProps {
   userId: string;
   refreshKey: number;
   readOnly?: boolean;
+  // The currently pinned entry's id (lives on the profile — only one
+  // entry can be pinned at a time). Undefined/null means nothing pinned.
+  pinnedId?: string | null;
+  // Called with the new pinned id (or null) whenever the pin changes —
+  // including implicitly, when the pinned entry is deleted.
+  onPinnedChanged?: (id: string | null) => void;
 }
 
 interface EditDraft {
@@ -19,7 +25,13 @@ interface EditDraft {
   note: string;
 }
 
-export default function LedgerList({ userId, refreshKey, readOnly = false }: LedgerListProps) {
+export default function LedgerList({
+  userId,
+  refreshKey,
+  readOnly = false,
+  pinnedId = null,
+  onPinnedChanged,
+}: LedgerListProps) {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +39,7 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pinningId, setPinningId] = useState<string | null>(null);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -52,6 +65,15 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries, refreshKey]);
+
+  // Pinned entry (if present) always sorts first; everything else stays
+  // reverse-chronological by consumed date.
+  const orderedEntries = useMemo(() => {
+    if (!pinnedId) return entries;
+    const pinned = entries.find((e) => e.id === pinnedId);
+    if (!pinned) return entries;
+    return [pinned, ...entries.filter((e) => e.id !== pinnedId)];
+  }, [entries, pinnedId]);
 
   const startEdit = (entry: LedgerEntry) => {
     setEditingId(entry.id);
@@ -127,6 +149,33 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
     }
 
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    // The pin lives on the profile row, so deleting the pinned entry
+    // clears it server-side (on delete set null) — this just keeps our
+    // local pinnedId prop in sync with that. Left empty on purpose rather
+    // than auto-selecting a new pin.
+    if (id === pinnedId) onPinnedChanged?.(null);
+  };
+
+  const togglePin = async (entry: LedgerEntry) => {
+    const isCurrentlyPinned = pinnedId === entry.id;
+    const newPinnedId = isCurrentlyPinned ? null : entry.id;
+
+    setPinningId(entry.id);
+    setError(null);
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ pinned_ledger_entry_id: newPinnedId })
+      .eq('id', userId);
+
+    setPinningId(null);
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+
+    onPinnedChanged?.(newPinnedId);
   };
 
   if (loading) return <p>Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
@@ -137,8 +186,9 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
 
   return (
     <ul>
-      {entries.map((entry) => {
+      {orderedEntries.map((entry) => {
         const isEditing = !readOnly && editingId === entry.id;
+        const isPinned = pinnedId === entry.id;
 
         if (isEditing && editDraft) {
           return (
@@ -213,6 +263,7 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
 
         return (
           <li key={entry.id}>
+            {isPinned && <span aria-label="Pinned">📌 </span>}
             <strong>{entry.title}</strong>
             {entry.creator && ` — ${entry.creator}`}
             <div>
@@ -232,6 +283,14 @@ export default function LedgerList({ userId, refreshKey, readOnly = false }: Led
             )}
             {!readOnly && (
               <div>
+                <button
+                  type="button"
+                  onClick={() => togglePin(entry)}
+                  disabled={pinningId === entry.id}
+                  aria-pressed={isPinned}
+                >
+                  {pinningId === entry.id ? '…' : isPinned ? 'Unpin' : 'Pin'}
+                </button>
                 <button type="button" onClick={() => startEdit(entry)}>
                   Edit
                 </button>

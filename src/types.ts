@@ -40,6 +40,7 @@ export interface Profile {
   journal_font: string | null;
   journal_layout: string | null;
   pinned_want_to_consume_id: string | null;
+  pinned_ledger_entry_id: string | null;
   created_at: string;
 }
 

@@ -78,6 +78,10 @@ export default function ProfilePage() {
         userId={displayedProfile.id}
         refreshKey={ledgerRefreshKey}
         readOnly={!contentEditable}
+        pinnedId={displayedProfile.pinned_ledger_entry_id}
+        onPinnedChanged={(id) =>
+          setLiveProfile({ ...displayedProfile, pinned_ledger_entry_id: id })
+        }
       />
 
       <hr />
