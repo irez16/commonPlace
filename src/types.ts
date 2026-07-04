@@ -62,3 +62,20 @@ export interface WantToConsumeItem {
   source_ledger_entry_id: string | null;
   created_at: string;
 }
+
+export type ClipType = 'text' | 'image' | 'video' | 'audio';
+
+export const CLIP_TYPES: ClipType[] = ['text', 'image', 'video', 'audio'];
+
+export interface Passage {
+  id: string;
+  user_id: string;
+  ledger_entry_id: string;
+  clip_type: ClipType;
+  clipped_text: string | null;
+  media_path: string | null;
+  annotation: string | null;
+  page_or_timestamp: string | null;
+  created_at: string;
+  updated_at: string;
+}
