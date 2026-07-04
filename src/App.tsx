@@ -5,6 +5,7 @@ import ProfilePage from './components/ProfilePage';
 import FollowingPage from './components/FollowingPage';
 import FollowersPage from './components/FollowersPage';
 import FeedPage from './components/FeedPage';
+import JournalPage from './components/JournalPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/feed" element={<FeedPage />} />
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/followers" element={<FollowersPage />} />
+        <Route path="/:handle/journal" element={<JournalPage />} />
         <Route path="/:handle" element={<ProfilePage />} />
       </Routes>
     </>

@@ -6,8 +6,6 @@ import AddLedgerEntry from './AddLedgerEntry';
 import LedgerList from './LedgerList';
 import AddWantToConsume from './AddWantToConsume';
 import WantToConsumeList from './WantToConsumeList';
-import AddPassage from './AddPassage';
-import PassageList from './PassageList';
 import type { Profile } from '../types';
 
 export default function ProfilePage() {
@@ -26,7 +24,6 @@ export default function ProfilePage() {
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
-  const [journalRefreshKey, setJournalRefreshKey] = useState(0);
 
   if (username && loading) return <p>Loading profile…</p>;
 
@@ -107,20 +104,9 @@ export default function ProfilePage() {
 
       <hr />
 
-      <h2>Commonplace Journal</h2>
-
-      {contentEditable && (
-        <AddPassage
-          userId={displayedProfile.id}
-          onAdded={() => setJournalRefreshKey((k) => k + 1)}
-        />
-      )}
-
-      <PassageList
-        userId={displayedProfile.id}
-        refreshKey={journalRefreshKey}
-        readOnly={!contentEditable}
-      />
+      <Link to={`/@${displayedProfile.username}/journal`}>
+        {isOwnProfile ? 'Your Commonplace Journal' : `${displayedProfile.name}'s Commonplace Journal`}
+      </Link>
     </div>
   );
 }
