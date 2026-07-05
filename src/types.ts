@@ -79,3 +79,13 @@ export interface Passage {
   created_at: string;
   updated_at: string;
 }
+
+export interface InCommonNotification {
+  id: string;
+  recipient_id: string;
+  other_user_id: string;
+  my_passage_id: string;
+  their_passage_id: string;
+  is_read: boolean;
+  created_at: string;
+}

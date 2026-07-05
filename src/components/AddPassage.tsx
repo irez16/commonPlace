@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { notifyInCommonMatches } from '../lib/inCommonMatching';
 import { CLIP_TYPES } from '../types';
 import type { ClipType, Passage } from '../types';
 
@@ -136,7 +137,11 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
     }
 
     resetForm();
-    onAdded?.(data as Passage);
+    const newPassage = data as Passage;
+    onAdded?.(newPassage);
+    // Fire-and-forget: shouldn't block the form or surface as an error to
+    // the person adding the clip, since the clip itself already saved.
+    notifyInCommonMatches(newPassage).catch(() => {});
   };
 
   if (optionsLoading) return <p>Loading your ledger…</p>;

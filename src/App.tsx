@@ -6,6 +6,7 @@ import FollowingPage from './components/FollowingPage';
 import FollowersPage from './components/FollowersPage';
 import FeedPage from './components/FeedPage';
 import JournalPage from './components/JournalPage';
+import NotificationsPage from './components/NotificationsPage';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/feed" element={<FeedPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/followers" element={<FollowersPage />} />
         <Route path="/:handle/journal" element={<JournalPage />} />
