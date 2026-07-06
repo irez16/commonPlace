@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { notifyInCommonMatches } from '../lib/inCommonMatching';
-import { CLIP_TYPES } from '../types';
-import type { ClipType, Passage } from '../types';
+import { CLIP_TYPES, MEDIA_TYPES } from '../types';
+import type { ClipType, LedgerEntry, MediaType, Passage } from '../types';
 
 interface AddPassageProps {
   userId: string;
@@ -23,6 +23,10 @@ const ACCEPT_BY_TYPE: Record<ClipType, string | undefined> = {
   audio: 'audio/*',
 };
 
+const NEW_SOURCE_VALUE = '__new__';
+
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default function AddPassage({ userId, onAdded }: AddPassageProps) {
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
@@ -34,6 +38,21 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
   const [pageOrTimestamp, setPageOrTimestamp] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Quick-add-a-source state — lets you add something to your Ledger
+  // without leaving the Journal. Deliberately minimal (type/title/creator)
+  // with an option to expand into the full set of fields, rather than
+  // always showing everything up front.
+  const [addingNewSource, setAddingNewSource] = useState(false);
+  const [newSourceExpanded, setNewSourceExpanded] = useState(false);
+  const [newMediaType, setNewMediaType] = useState<MediaType>('book');
+  const [newTitle, setNewTitle] = useState('');
+  const [newCreator, setNewCreator] = useState('');
+  const [newUrl, setNewUrl] = useState('');
+  const [newConsumedDate, setNewConsumedDate] = useState(today());
+  const [newRating, setNewRating] = useState('');
+  const [newNote, setNewNote] = useState('');
+  const [creatingSource, setCreatingSource] = useState(false);
 
   // Clips are always linked to a ledger entry, so we need something to
   // link to. Fetches the user's own entries for the picker — title +
@@ -60,13 +79,30 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
 
       const options = (data ?? []) as LedgerOption[];
       setLedgerOptions(options);
-      if (options.length > 0) setLedgerEntryId((prev) => prev || options[0].id);
+      if (options.length > 0) {
+        setLedgerEntryId((prev) => prev || options[0].id);
+      } else {
+        // Nothing in the Ledger yet — go straight to quick-add rather
+        // than dead-ending with "add something to your Ledger first".
+        setAddingNewSource(true);
+      }
     })();
 
     return () => {
       cancelled = true;
     };
   }, [userId]);
+
+  const resetNewSourceForm = () => {
+    setNewMediaType('book');
+    setNewTitle('');
+    setNewCreator('');
+    setNewUrl('');
+    setNewConsumedDate(today());
+    setNewRating('');
+    setNewNote('');
+    setNewSourceExpanded(false);
+  };
 
   const resetForm = () => {
     setClippedText('');
@@ -75,10 +111,56 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
     setPageOrTimestamp('');
   };
 
+  const createNewSource = async () => {
+    setError(null);
+
+    if (!newTitle.trim()) {
+      setError('Title is required.');
+      return;
+    }
+
+    setCreatingSource(true);
+
+    const { data, error: insertError } = await supabase
+      .from('ledger_entries')
+      .insert({
+        user_id: userId,
+        media_type: newMediaType,
+        title: newTitle.trim(),
+        creator: newCreator.trim() || null,
+        url: newUrl.trim() || null,
+        consumed_date: newConsumedDate,
+        rating: newRating ? Number(newRating) : null,
+        note: newNote.trim() || null,
+      })
+      .select()
+      .single();
+
+    setCreatingSource(false);
+
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+
+    const created = data as LedgerEntry;
+    setLedgerOptions((prev) => [
+      { id: created.id, title: created.title, creator: created.creator },
+      ...prev,
+    ]);
+    setLedgerEntryId(created.id);
+    setAddingNewSource(false);
+    resetNewSourceForm();
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    if (addingNewSource) {
+      setError('Finish adding the new source first, or cancel it.');
+      return;
+    }
     if (!ledgerEntryId) {
       setError('Pick which ledger entry this clip is from.');
       return;
@@ -146,74 +228,172 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
 
   if (optionsLoading) return <p>Loading your ledger…</p>;
 
-  if (ledgerOptions.length === 0) {
-    return <p>Add something to your Ledger first — every clip needs to be linked to an entry.</p>;
-  }
-
   return (
     <form onSubmit={handleSubmit}>
       <label>
         From
-        <select value={ledgerEntryId} onChange={(e) => setLedgerEntryId(e.target.value)}>
+        <select
+          value={addingNewSource ? NEW_SOURCE_VALUE : ledgerEntryId}
+          onChange={(e) => {
+            if (e.target.value === NEW_SOURCE_VALUE) {
+              setAddingNewSource(true);
+            } else {
+              setAddingNewSource(false);
+              setLedgerEntryId(e.target.value);
+            }
+          }}
+        >
           {ledgerOptions.map((opt) => (
             <option key={opt.id} value={opt.id}>
               {opt.title}
               {opt.creator ? ` — ${opt.creator}` : ''}
             </option>
           ))}
+          <option value={NEW_SOURCE_VALUE}>+ Add new source</option>
         </select>
       </label>
 
-      <div>
-        {CLIP_TYPES.map((type) => (
-          <label key={type}>
-            <input
-              type="radio"
-              name="clip_type"
-              value={type}
-              checked={clipType === type}
-              onChange={() => {
-                setClipType(type);
-                setFile(null);
-              }}
-            />
-            {type}
+      {addingNewSource && (
+        <div>
+          <label>
+            Type
+            <select
+              value={newMediaType}
+              onChange={(e) => setNewMediaType(e.target.value as MediaType)}
+            >
+              {MEDIA_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </label>
-        ))}
-      </div>
 
-      {clipType === 'text' ? (
-        <textarea
-          placeholder="Paste or type the passage…"
-          value={clippedText}
-          onChange={(e) => setClippedText(e.target.value)}
-          rows={4}
-        />
-      ) : (
-        <input
-          type="file"
-          accept={ACCEPT_BY_TYPE[clipType]}
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
+          <input
+            type="text"
+            placeholder="Title"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Author / director / host (optional)"
+            value={newCreator}
+            onChange={(e) => setNewCreator(e.target.value)}
+          />
+
+          {newSourceExpanded ? (
+            <>
+              <input
+                type="url"
+                placeholder="Link (optional)"
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+              />
+              <label>
+                Date consumed
+                <input
+                  type="date"
+                  value={newConsumedDate}
+                  onChange={(e) => setNewConsumedDate(e.target.value)}
+                />
+              </label>
+              <label>
+                Rating (optional)
+                <select value={newRating} onChange={(e) => setNewRating(e.target.value)}>
+                  <option value="">—</option>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <textarea
+                placeholder="Note (optional)"
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                rows={3}
+              />
+            </>
+          ) : (
+            <button type="button" onClick={() => setNewSourceExpanded(true)}>
+              Add full details (rating, note, date, link)
+            </button>
+          )}
+
+          <button type="button" onClick={createNewSource} disabled={creatingSource}>
+            {creatingSource ? 'Adding…' : 'Add source'}
+          </button>
+          {ledgerOptions.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setAddingNewSource(false);
+                resetNewSourceForm();
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       )}
 
-      <input
-        type="text"
-        placeholder="Page or timestamp (optional)"
-        value={pageOrTimestamp}
-        onChange={(e) => setPageOrTimestamp(e.target.value)}
-      />
+      {!addingNewSource && (
+        <>
+          <div>
+            {CLIP_TYPES.map((type) => (
+              <label key={type}>
+                <input
+                  type="radio"
+                  name="clip_type"
+                  value={type}
+                  checked={clipType === type}
+                  onChange={() => {
+                    setClipType(type);
+                    setFile(null);
+                  }}
+                />
+                {type}
+              </label>
+            ))}
+          </div>
 
-      <textarea
-        placeholder="Your thoughts on this (optional)"
-        value={annotation}
-        onChange={(e) => setAnnotation(e.target.value)}
-        rows={2}
-      />
+          {clipType === 'text' ? (
+            <textarea
+              placeholder="Paste or type the passage…"
+              value={clippedText}
+              onChange={(e) => setClippedText(e.target.value)}
+              rows={4}
+            />
+          ) : (
+            <input
+              type="file"
+              accept={ACCEPT_BY_TYPE[clipType]}
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          )}
 
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Adding…' : 'Add to journal'}
-      </button>
+          <input
+            type="text"
+            placeholder="Page or timestamp (optional)"
+            value={pageOrTimestamp}
+            onChange={(e) => setPageOrTimestamp(e.target.value)}
+          />
+
+          <textarea
+            placeholder="Your thoughts on this (optional)"
+            value={annotation}
+            onChange={(e) => setAnnotation(e.target.value)}
+            rows={2}
+          />
+
+          <button type="submit" disabled={submitting}>
+            {submitting ? 'Adding…' : 'Add to journal'}
+          </button>
+        </>
+      )}
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
     </form>
