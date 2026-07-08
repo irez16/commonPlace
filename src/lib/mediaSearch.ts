@@ -1,0 +1,102 @@
+// Search-as-you-type data sources for autofilling Ledger/Journal-source
+// entries. Each source has a different shape, normalized here into one
+// common result type so the UI doesn't need to know the differences.
+
+export interface MediaSearchResult {
+  title: string;
+  creator: string | null;
+  coverUrl: string | null;
+  year: string | null;
+  // Only present on film search results. OMDb's search endpoint doesn't
+  // include the director — that requires a second lookup by this id,
+  // done in getFilmDetails once the person actually picks a result.
+  imdbId?: string;
+}
+
+const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY as string | undefined;
+
+// Google Books: free, no API key, safe to call directly from the browser.
+export async function searchBooks(query: string): Promise<MediaSearchResult[]> {
+  if (!query.trim()) return [];
+
+  const res = await fetch(
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
+  );
+  if (!res.ok) throw new Error('Book search failed.');
+
+  const data = await res.json();
+
+  return (data.items ?? []).map((item: any) => ({
+    title: item.volumeInfo?.title ?? 'Untitled',
+    creator: item.volumeInfo?.authors?.join(', ') ?? null,
+    coverUrl: item.volumeInfo?.imageLinks?.thumbnail ?? null,
+    year: item.volumeInfo?.publishedDate?.slice(0, 4) ?? null,
+  }));
+}
+
+// iTunes Search API: free, no API key, safe to call directly from the
+// browser. Returns everything needed in one call — no follow-up lookup.
+export async function searchPodcasts(query: string): Promise<MediaSearchResult[]> {
+  if (!query.trim()) return [];
+
+  const res = await fetch(
+    `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=8`
+  );
+  if (!res.ok) throw new Error('Podcast search failed.');
+
+  const data = await res.json();
+
+  return (data.results ?? []).map((item: any) => ({
+    title: item.collectionName ?? 'Untitled',
+    creator: item.artistName ?? null,
+    coverUrl: item.artworkUrl100 ?? null,
+    year: item.releaseDate ? String(item.releaseDate).slice(0, 4) : null,
+  }));
+}
+
+// OMDb: requires a free API key (VITE_OMDB_API_KEY). The search endpoint
+// only returns title/year/poster — director requires a second call by
+// imdbID, made in getFilmDetails once a result is actually selected
+// rather than for every row in the dropdown (keeps the search itself fast
+// and avoids burning quota on results the person never picks).
+export async function searchFilms(query: string): Promise<MediaSearchResult[]> {
+  if (!query.trim()) return [];
+  if (!OMDB_API_KEY) {
+    throw new Error('Film search is not configured (missing VITE_OMDB_API_KEY).');
+  }
+
+  const res = await fetch(
+    `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}&type=movie`
+  );
+  if (!res.ok) throw new Error('Film search failed.');
+
+  const data = await res.json();
+  if (data.Response === 'False') return [];
+
+  return (data.Search ?? []).map((item: any) => ({
+    title: item.Title,
+    creator: null,
+    coverUrl: item.Poster && item.Poster !== 'N/A' ? item.Poster : null,
+    year: item.Year ?? null,
+    imdbId: item.imdbID,
+  }));
+}
+
+export async function getFilmDetails(imdbId: string): Promise<MediaSearchResult> {
+  if (!OMDB_API_KEY) {
+    throw new Error('Film search is not configured (missing VITE_OMDB_API_KEY).');
+  }
+
+  const res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&i=${imdbId}`);
+  if (!res.ok) throw new Error('Failed to load film details.');
+
+  const data = await res.json();
+
+  return {
+    title: data.Title,
+    creator: data.Director && data.Director !== 'N/A' ? data.Director : null,
+    coverUrl: data.Poster && data.Poster !== 'N/A' ? data.Poster : null,
+    year: data.Year ?? null,
+    imdbId,
+  };
+}

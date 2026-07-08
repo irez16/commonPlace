@@ -1,0 +1,149 @@
+import { useState, useEffect, useRef } from 'react';
+import { searchBooks, searchPodcasts, searchFilms, getFilmDetails } from '../lib/mediaSearch';
+import type { MediaSearchResult } from '../lib/mediaSearch';
+import type { MediaType } from '../types';
+
+interface MediaSearchFieldProps {
+  mediaType: 'book' | 'podcast' | 'film';
+  value: string;
+  onChange: (title: string) => void;
+  onSelect: (result: MediaSearchResult) => void;
+  placeholder?: string;
+}
+
+const SEARCH_FN: Record<MediaSearchFieldProps['mediaType'], (q: string) => Promise<MediaSearchResult[]>> = {
+  book: searchBooks,
+  podcast: searchPodcasts,
+  film: searchFilms,
+};
+
+// Supported here vs. left as plain manual entry elsewhere.
+export function supportsSearch(mediaType: MediaType): mediaType is 'book' | 'podcast' | 'film' {
+  return mediaType === 'book' || mediaType === 'podcast' || mediaType === 'film';
+}
+
+export default function MediaSearchField({
+  mediaType,
+  value,
+  onChange,
+  onSelect,
+  placeholder,
+}: MediaSearchFieldProps) {
+  const [results, setResults] = useState<MediaSearchResult[]>([]);
+  const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!value.trim()) {
+      setResults([]);
+      setOpen(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      setError(null);
+      try {
+        const found = await SEARCH_FN[mediaType](value);
+        setResults(found);
+        setOpen(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Search failed.');
+      } finally {
+        setSearching(false);
+      }
+    }, 350);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, mediaType]);
+
+  const handleSelect = async (result: MediaSearchResult) => {
+    if (mediaType === 'film' && result.imdbId) {
+      setResolvingId(result.imdbId);
+      setError(null);
+      try {
+        const full = await getFilmDetails(result.imdbId);
+        onSelect(full);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load film details.');
+        return;
+      } finally {
+        setResolvingId(null);
+      }
+    } else {
+      onSelect(result);
+    }
+    setOpen(false);
+  };
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        type="text"
+        placeholder={placeholder ?? 'Title'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => results.length > 0 && setOpen(true)}
+        onBlur={() => {
+          // Delay so a click on a dropdown item registers before we close it.
+          closeTimeoutRef.current = setTimeout(() => setOpen(false), 150);
+        }}
+      />
+      {searching && <span style={{ fontSize: '0.8em' }}>Searching…</span>}
+      {error && <p style={{ color: 'crimson', fontSize: '0.85em' }}>{error}</p>}
+
+      {open && results.length > 0 && (
+        <ul
+          style={{
+            position: 'absolute',
+            zIndex: 10,
+            left: 0,
+            right: 0,
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            border: '1px solid #ccc',
+            background: 'white',
+            maxHeight: 260,
+            overflowY: 'auto',
+          }}
+        >
+          {results.map((result, i) => (
+            <li
+              key={result.imdbId ?? `${result.title}-${i}`}
+              onMouseDown={(e) => {
+                // onMouseDown fires before the input's onBlur, so the click
+                // registers before the dropdown closes.
+                e.preventDefault();
+                handleSelect(result);
+              }}
+              style={{ display: 'flex', gap: 8, padding: '6px 8px', cursor: 'pointer' }}
+            >
+              {result.coverUrl && (
+                <img src={result.coverUrl} alt="" style={{ width: 28, height: 40, objectFit: 'cover' }} />
+              )}
+              <div>
+                <div>{result.title}</div>
+                <div style={{ fontSize: '0.8em', color: '#666' }}>
+                  {result.creator}
+                  {result.creator && result.year ? ' · ' : ''}
+                  {result.year}
+                  {mediaType === 'film' && resolvingId === result.imdbId && ' · loading details…'}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

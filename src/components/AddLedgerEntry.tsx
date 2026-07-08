@@ -3,6 +3,8 @@ import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
+import MediaSearchField, { supportsSearch } from './MediaSearchField';
+import type { MediaSearchResult } from '../lib/mediaSearch';
 
 interface AddLedgerEntryProps {
   userId: string;
@@ -21,6 +23,11 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleAutofill = (result: MediaSearchResult) => {
+    setTitle(result.title);
+    setCreator(result.creator ?? '');
+  };
 
   const resetForm = () => {
     setMediaType('book');
@@ -88,13 +95,23 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
         </select>
       </label>
 
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
+      {supportsSearch(mediaType) ? (
+        <MediaSearchField
+          mediaType={mediaType}
+          value={title}
+          onChange={setTitle}
+          onSelect={handleAutofill}
+          placeholder="Title — start typing to search"
+        />
+      ) : (
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      )}
 
       <input
         type="text"
