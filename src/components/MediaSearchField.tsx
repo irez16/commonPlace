@@ -36,9 +36,20 @@ export default function MediaSearchField({
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Selecting a result updates `value` via the parent's onSelect handler
+  // (it sets the title to the picked result). That value change would
+  // otherwise look identical to the person typing something new, and
+  // trigger another search. This flag lets handleSelect mark the very
+  // next value change as "not a real edit" so it's skipped.
+  const skipNextSearchRef = useRef(false);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
 
     if (!value.trim()) {
       setResults([]);
@@ -67,6 +78,8 @@ export default function MediaSearchField({
   }, [value, mediaType]);
 
   const handleSelect = async (result: MediaSearchResult) => {
+    skipNextSearchRef.current = true;
+
     if (mediaType === 'film' && result.imdbId) {
       setResolvingId(result.imdbId);
       setError(null);
@@ -75,6 +88,7 @@ export default function MediaSearchField({
         onSelect(full);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load film details.');
+        skipNextSearchRef.current = false;
         return;
       } finally {
         setResolvingId(null);
@@ -82,6 +96,7 @@ export default function MediaSearchField({
     } else {
       onSelect(result);
     }
+    setResults([]);
     setOpen(false);
   };
 
