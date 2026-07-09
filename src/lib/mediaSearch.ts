@@ -15,6 +15,20 @@ export interface MediaSearchResult {
 
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY as string | undefined;
 
+// Surfaces the real status code + response body in the thrown error and
+// logs the full detail to the console, instead of a generic message that
+// hides what actually went wrong.
+async function throwDetailedError(res: Response, label: string): Promise<never> {
+  let bodyText = '';
+  try {
+    bodyText = await res.text();
+  } catch {
+    // ignore — body wasn't readable, status code alone is still useful
+  }
+  console.error(`${label} failed:`, res.status, res.statusText, bodyText);
+  throw new Error(`${label} failed (HTTP ${res.status}). Check the browser console for details.`);
+}
+
 // Google Books: free, no API key, safe to call directly from the browser.
 export async function searchBooks(query: string): Promise<MediaSearchResult[]> {
   if (!query.trim()) return [];
@@ -22,7 +36,7 @@ export async function searchBooks(query: string): Promise<MediaSearchResult[]> {
   const res = await fetch(
     `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
   );
-  if (!res.ok) throw new Error('Book search failed.');
+  if (!res.ok) await throwDetailedError(res, 'Book search');
 
   const data = await res.json();
 
@@ -42,7 +56,7 @@ export async function searchPodcasts(query: string): Promise<MediaSearchResult[]
   const res = await fetch(
     `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=8`
   );
-  if (!res.ok) throw new Error('Podcast search failed.');
+  if (!res.ok) await throwDetailedError(res, 'Podcast search');
 
   const data = await res.json();
 
@@ -68,10 +82,19 @@ export async function searchFilms(query: string): Promise<MediaSearchResult[]> {
   const res = await fetch(
     `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}&type=movie`
   );
-  if (!res.ok) throw new Error('Film search failed.');
+  if (!res.ok) await throwDetailedError(res, 'Film search');
 
   const data = await res.json();
-  if (data.Response === 'False') return [];
+  if (data.Response === 'False') {
+    // OMDb returns 200 OK with Response:"False" for both "no results" and
+    // real errors (like an invalid key) — surface the latter, not just
+    // silently show zero results.
+    if (data.Error && data.Error !== 'Movie not found!') {
+      console.error('Film search failed:', data.Error);
+      throw new Error(`Film search failed: ${data.Error}`);
+    }
+    return [];
+  }
 
   return (data.Search ?? []).map((item: any) => ({
     title: item.Title,
@@ -88,7 +111,7 @@ export async function getFilmDetails(imdbId: string): Promise<MediaSearchResult>
   }
 
   const res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&i=${imdbId}`);
-  if (!res.ok) throw new Error('Failed to load film details.');
+  if (!res.ok) await throwDetailedError(res, 'Film details lookup');
 
   const data = await res.json();
 
