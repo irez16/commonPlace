@@ -14,6 +14,7 @@ export interface MediaSearchResult {
 }
 
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY as string | undefined;
+const GOOGLE_BOOKS_API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY as string | undefined;
 
 // Surfaces the real status code + response body in the thrown error and
 // logs the full detail to the console, instead of a generic message that
@@ -29,13 +30,25 @@ async function throwDetailedError(res: Response, label: string): Promise<never> 
   throw new Error(`${label} failed (HTTP ${res.status}). Check the browser console for details.`);
 }
 
-// Google Books: free, no API key, safe to call directly from the browser.
+// Google Books: works without a key, but Google's shared keyless quota has
+// gotten unreliable (429s even on a first request) — VITE_GOOGLE_BOOKS_API_KEY
+// moves this onto its own 1,000/day quota instead of the exhausted global
+// pool. Falls back to keyless if unset, since it does still work sometimes.
 export async function searchBooks(query: string): Promise<MediaSearchResult[]> {
   if (!query.trim()) return [];
 
+  const keyParam = GOOGLE_BOOKS_API_KEY ? `&key=${GOOGLE_BOOKS_API_KEY}` : '';
   const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8${keyParam}`
   );
+
+  if (res.status === 429) {
+    throw new Error(
+      GOOGLE_BOOKS_API_KEY
+        ? 'Book search failed (HTTP 429) — quota exceeded even with a key. Check usage in Google Cloud Console.'
+        : 'Book search failed (HTTP 429) — Google\'s free unauthenticated quota is exhausted. Add VITE_GOOGLE_BOOKS_API_KEY to fix this.'
+    );
+  }
   if (!res.ok) await throwDetailedError(res, 'Book search');
 
   const data = await res.json();
