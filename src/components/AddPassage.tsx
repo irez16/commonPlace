@@ -4,6 +4,11 @@ import { supabase } from '../lib/supabaseClient';
 import { notifyInCommonMatches } from '../lib/inCommonMatching';
 import { CLIP_TYPES, MEDIA_TYPES } from '../types';
 import type { ClipType, LedgerEntry, MediaType, Passage } from '../types';
+import MediaSearchField, { supportsSearch } from './MediaSearchField';
+import LinkAutofillField from './LinkAutofillField';
+import type { MediaSearchResult } from '../lib/mediaSearch';
+
+const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
 interface AddPassageProps {
   userId: string;
@@ -92,6 +97,16 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
       cancelled = true;
     };
   }, [userId]);
+
+  const handleNewSourceAutofill = (result: MediaSearchResult) => {
+    setNewTitle(result.title);
+    setNewCreator(result.creator ?? '');
+  };
+
+  const handleNewSourceLinkFetched = (metadata: { title: string | null; creator: string | null }) => {
+    if (metadata.title) setNewTitle(metadata.title);
+    if (metadata.creator) setNewCreator(metadata.creator);
+  };
 
   const resetNewSourceForm = () => {
     setNewMediaType('book');
@@ -269,12 +284,30 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
             </select>
           </label>
 
-          <input
-            type="text"
-            placeholder="Title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
+          {LINK_AUTOFILL_TYPES.includes(newMediaType) && (
+            <LinkAutofillField
+              url={newUrl}
+              onUrlChange={setNewUrl}
+              onFetched={handleNewSourceLinkFetched}
+            />
+          )}
+
+          {supportsSearch(newMediaType) ? (
+            <MediaSearchField
+              mediaType={newMediaType}
+              value={newTitle}
+              onChange={setNewTitle}
+              onSelect={handleNewSourceAutofill}
+              placeholder="Title — start typing to search"
+            />
+          ) : (
+            <input
+              type="text"
+              placeholder="Title"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
+          )}
 
           <input
             type="text"
@@ -285,12 +318,14 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
 
           {newSourceExpanded ? (
             <>
-              <input
-                type="url"
-                placeholder="Link (optional)"
-                value={newUrl}
-                onChange={(e) => setNewUrl(e.target.value)}
-              />
+              {!LINK_AUTOFILL_TYPES.includes(newMediaType) && (
+                <input
+                  type="url"
+                  placeholder="Link (optional)"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                />
+              )}
               <label>
                 Date consumed
                 <input

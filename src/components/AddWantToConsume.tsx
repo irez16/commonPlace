@@ -3,6 +3,11 @@ import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES } from '../types';
 import type { MediaType, WantToConsumeItem } from '../types';
+import MediaSearchField, { supportsSearch } from './MediaSearchField';
+import LinkAutofillField from './LinkAutofillField';
+import type { MediaSearchResult } from '../lib/mediaSearch';
+
+const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
 interface AddWantToConsumeProps {
   userId: string;
@@ -18,6 +23,16 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
   const [isPublic, setIsPublic] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleAutofill = (result: MediaSearchResult) => {
+    setTitle(result.title);
+    setCreator(result.creator ?? '');
+  };
+
+  const handleLinkFetched = (metadata: { title: string | null; creator: string | null }) => {
+    if (metadata.title) setTitle(metadata.title);
+    if (metadata.creator) setCreator(metadata.creator);
+  };
 
   const resetForm = () => {
     setMediaType('book');
@@ -83,13 +98,27 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
         </select>
       </label>
 
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
+      {LINK_AUTOFILL_TYPES.includes(mediaType) && (
+        <LinkAutofillField url={url} onUrlChange={setUrl} onFetched={handleLinkFetched} />
+      )}
+
+      {supportsSearch(mediaType) ? (
+        <MediaSearchField
+          mediaType={mediaType}
+          value={title}
+          onChange={setTitle}
+          onSelect={handleAutofill}
+          placeholder="Title — start typing to search"
+        />
+      ) : (
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      )}
 
       <input
         type="text"
@@ -98,12 +127,14 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
         onChange={(e) => setCreator(e.target.value)}
       />
 
-      <input
-        type="url"
-        placeholder="Link (optional)"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-      />
+      {!LINK_AUTOFILL_TYPES.includes(mediaType) && (
+        <input
+          type="url"
+          placeholder="Link (optional)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+      )}
 
       <textarea
         placeholder="Note (optional)"

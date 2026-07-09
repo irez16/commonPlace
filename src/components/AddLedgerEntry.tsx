@@ -4,7 +4,10 @@ import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
 import MediaSearchField, { supportsSearch } from './MediaSearchField';
+import LinkAutofillField from './LinkAutofillField';
 import type { MediaSearchResult } from '../lib/mediaSearch';
+
+const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
 interface AddLedgerEntryProps {
   userId: string;
@@ -27,6 +30,11 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
   const handleAutofill = (result: MediaSearchResult) => {
     setTitle(result.title);
     setCreator(result.creator ?? '');
+  };
+
+  const handleLinkFetched = (metadata: { title: string | null; creator: string | null }) => {
+    if (metadata.title) setTitle(metadata.title);
+    if (metadata.creator) setCreator(metadata.creator);
   };
 
   const resetForm = () => {
@@ -95,6 +103,10 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
         </select>
       </label>
 
+      {LINK_AUTOFILL_TYPES.includes(mediaType) && (
+        <LinkAutofillField url={url} onUrlChange={setUrl} onFetched={handleLinkFetched} />
+      )}
+
       {supportsSearch(mediaType) ? (
         <MediaSearchField
           mediaType={mediaType}
@@ -120,12 +132,14 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
         onChange={(e) => setCreator(e.target.value)}
       />
 
-      <input
-        type="url"
-        placeholder="Link (optional)"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-      />
+      {!LINK_AUTOFILL_TYPES.includes(mediaType) && (
+        <input
+          type="url"
+          placeholder="Link (optional)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+      )}
 
       <label>
         Date consumed
