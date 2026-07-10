@@ -1,0 +1,93 @@
+.passage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.passage-card {
+  background: var(--bg-raised);
+  border-left: 3px solid var(--passage-accent, var(--marginalia));
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+}
+
+.passage-card-type {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.passage-card-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.passage-card-media img,
+.passage-card-media video {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.passage-card-media audio {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.passage-card-annotation {
+  font-family: var(--passage-font, var(--font-handwriting));
+  color: var(--passage-accent, var(--marginalia));
+  font-size: 21px;
+  line-height: 1.3;
+  transform: rotate(-0.8deg);
+  margin: 4px 0 12px;
+}
+
+.passage-card-source {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.passage-card-source a {
+  color: var(--text-muted);
+}
+
+.passage-card-delete {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.passage-card-delete:hover {
+  color: var(--accent);
+}
+
+.passage-list-status {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+}

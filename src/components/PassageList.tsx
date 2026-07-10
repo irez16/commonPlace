@@ -1,11 +1,23 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type CSSProperties } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { resolveJournalFont } from '../lib/journalFonts';
 import type { Passage, LedgerEntry } from '../types';
+import './PassageList.css';
 
 interface PassageListProps {
   userId: string;
+  // Needed to build the /@username/ledger/:entryId source link on each
+  // clip — PassageList doesn't fetch the profile itself.
+  username: string;
   refreshKey: number;
   readOnly?: boolean;
+  // Per-user Journal customization (Marginalia). Both are currently
+  // always null for every profile, since there's no Settings UI yet to
+  // set them — these props exist so the rendering side is ready the
+  // moment that UI ships, without another pass through this file.
+  journalCoverColor?: string | null;
+  journalFont?: string | null;
 }
 
 interface EntryContext {
@@ -13,7 +25,21 @@ interface EntryContext {
   creator: string | null;
 }
 
-export default function PassageList({ userId, refreshKey, readOnly = false }: PassageListProps) {
+const CLIP_TYPE_LABELS: Record<Passage['clip_type'], string> = {
+  text: 'Text',
+  image: 'Image',
+  video: 'Video',
+  audio: 'Audio',
+};
+
+export default function PassageList({
+  userId,
+  username,
+  refreshKey,
+  readOnly = false,
+  journalCoverColor,
+  journalFont,
+}: PassageListProps) {
   const [passages, setPassages] = useState<Passage[]>([]);
   const [entryById, setEntryById] = useState<Record<string, EntryContext>>({});
   const [loading, setLoading] = useState(true);
@@ -98,45 +124,74 @@ export default function PassageList({ userId, refreshKey, readOnly = false }: Pa
     setPassages((prev) => prev.filter((p) => p.id !== id));
   };
 
-  if (loading) return <p>Loading journal…</p>;
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (loading) return <p className="passage-list-status">Loading journal…</p>;
+  if (error) return <p className="passage-list-status" style={{ color: 'crimson' }}>{error}</p>;
   if (passages.length === 0) {
-    return <p>{readOnly ? 'No journal entries yet.' : "You haven't clipped anything yet."}</p>;
+    return (
+      <p className="passage-list-status">
+        {readOnly ? 'No journal entries yet.' : "You haven't clipped anything yet."}
+      </p>
+    );
   }
 
+  // CSS custom properties, not literal color/font values — lets each
+  // card's annotation resolve to the per-user Journal color/font via
+  // var(--passage-accent, var(--marginalia)) in the stylesheet, while
+  // still falling back cleanly to the default Marginalia navy/Caveat
+  // when a profile hasn't customized these (i.e. every profile, today).
+  const cardStyle: CSSProperties & Record<string, string> = {};
+  if (journalCoverColor) cardStyle['--passage-accent'] = journalCoverColor;
+  if (journalFont) cardStyle['--passage-font'] = resolveJournalFont(journalFont);
+
   return (
-    <ul>
+    <ul className="passage-list">
       {passages.map((passage) => {
         const entry = entryById[passage.ledger_entry_id];
 
         return (
-          <li key={passage.id}>
-            {passage.clip_type === 'text' && <blockquote>{passage.clipped_text}</blockquote>}
+          <li key={passage.id} className="passage-card" style={cardStyle}>
+            <div className="passage-card-type">{CLIP_TYPE_LABELS[passage.clip_type]}</div>
+
+            {passage.clip_type === 'text' && (
+              <p className="passage-card-quote">{passage.clipped_text}</p>
+            )}
             {passage.clip_type === 'image' && passage.media_path && (
-              <img src={mediaUrl(passage.media_path)} alt="" style={{ maxWidth: '100%' }} />
+              <div className="passage-card-media">
+                <img src={mediaUrl(passage.media_path)} alt="" />
+              </div>
             )}
             {passage.clip_type === 'video' && passage.media_path && (
-              <video controls src={mediaUrl(passage.media_path)} style={{ maxWidth: '100%' }} />
+              <div className="passage-card-media">
+                <video controls src={mediaUrl(passage.media_path)} />
+              </div>
             )}
             {passage.clip_type === 'audio' && passage.media_path && (
-              <audio controls src={mediaUrl(passage.media_path)} />
+              <div className="passage-card-media">
+                <audio controls src={mediaUrl(passage.media_path)} />
+              </div>
             )}
 
-            {passage.annotation && <p>{passage.annotation}</p>}
+            {passage.annotation && (
+              <p className="passage-card-annotation">{passage.annotation}</p>
+            )}
 
-            <div>
+            <div className="passage-card-source">
               {entry && (
                 <span>
-                  From: {entry.title}
-                  {entry.creator ? ` — ${entry.creator}` : ''}
+                  From{' '}
+                  <Link to={`/@${username}/ledger/${passage.ledger_entry_id}`}>
+                    {entry.title}
+                    {entry.creator ? ` — ${entry.creator}` : ''}
+                  </Link>
                 </span>
               )}
-              {passage.page_or_timestamp && <span> · {passage.page_or_timestamp}</span>}
+              {passage.page_or_timestamp && <span>· {passage.page_or_timestamp}</span>}
             </div>
 
             {!readOnly && (
               <button
                 type="button"
+                className="passage-card-delete"
                 onClick={() => deletePassage(passage.id, passage.media_path)}
                 disabled={deletingId === passage.id}
               >

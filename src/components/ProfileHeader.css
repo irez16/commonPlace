@@ -1,0 +1,124 @@
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-header-name {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 30px;
+  color: var(--text);
+  margin: 0;
+}
+
+.profile-header-username {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.profile-header-currently {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  margin: 6px 0 0;
+}
+
+.profile-header-currently-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--accent);
+  margin-right: 6px;
+}
+
+.profile-header-bio {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+.profile-header-counts {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 14px;
+}
+
+.profile-header-counts a {
+  color: var(--accent);
+}
+
+.profile-header-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.profile-header-button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.profile-header-button:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+/* --- Edit form --- */
+.profile-header-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-header-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.profile-header-form input,
+.profile-header-form textarea {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.profile-header-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-header-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 0;
+}

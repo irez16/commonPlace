@@ -29,6 +29,7 @@
   --font-serif: 'Fraunces', Georgia, serif;       /* titles, quotes */
   --font-sans: 'Inter', system-ui, sans-serif;    /* body text */
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace; /* metadata, chips, uppercase labels */
+  --font-handwriting: 'Caveat', cursive;          /* Journal annotations (Marginalia) — default; per-user override via profile.journal_font once Settings exists */
 
   font-family: var(--font-sans);
   font-size: 16px;

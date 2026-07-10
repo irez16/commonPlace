@@ -1,0 +1,25 @@
+.follow-button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.follow-button.is-following {
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.follow-button-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 6px 0 0;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import './FollowButton.css';
 
 interface FollowButtonProps {
   viewerId: string | null;
@@ -88,18 +89,19 @@ export default function FollowButton({ viewerId, targetUserId }: FollowButtonPro
     return <Link to="/">Log in to follow</Link>;
   }
 
-  if (loading) return <button type="button" disabled>…</button>;
+  if (loading) return <button type="button" className="follow-button" disabled>…</button>;
 
   return (
     <div>
       <button
         type="button"
+        className={`follow-button${isFollowing ? ' is-following' : ''}`}
         onClick={isFollowing ? unfollow : follow}
         disabled={working}
       >
         {working ? '…' : isFollowing ? 'Unfollow' : 'Follow'}
       </button>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="follow-button-error">{error}</p>}
     </div>
   );
 }

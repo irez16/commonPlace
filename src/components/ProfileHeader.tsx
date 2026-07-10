@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useFollowCounts } from '../hooks/useFollowCounts';
 import FollowButton from './FollowButton';
 import type { Profile } from '../types';
+import './ProfileHeader.css';
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -91,7 +92,7 @@ export default function ProfileHeader({
 
   if (isEditing && draft) {
     return (
-      <div>
+      <div className="profile-header-form">
         <label>
           Name
           <input
@@ -100,7 +101,7 @@ export default function ProfileHeader({
             onChange={(e) => setDraft((d) => d && { ...d, name: e.target.value })}
           />
         </label>
-        <p>@{profile.username}</p>
+        <p className="profile-header-username">@{profile.username}</p>
         <label>
           Currently
           <input
@@ -118,43 +119,64 @@ export default function ProfileHeader({
             rows={3}
           />
         </label>
-        {error && <p style={{ color: 'crimson' }}>{error}</p>}
-        <button type="button" onClick={saveEdit} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </button>
-        <button type="button" onClick={cancelEdit} disabled={saving}>
-          Cancel
-        </button>
+        {error && <p className="profile-header-error">{error}</p>}
+        <div className="profile-header-form-actions">
+          <button
+            type="button"
+            className="profile-header-button"
+            onClick={saveEdit}
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            className="profile-header-button"
+            onClick={cancelEdit}
+            disabled={saving}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1>{profile.name}</h1>
-      <p>@{profile.username}</p>
-      {profile.currently && <p>Currently: {profile.currently}</p>}
-      {profile.bio && <p>{profile.bio}</p>}
+    <div className="profile-header">
+      <h1 className="profile-header-name">{profile.name}</h1>
+      <p className="profile-header-username">@{profile.username}</p>
+      {profile.currently && (
+        <p className="profile-header-currently">
+          <span className="profile-header-currently-label">Currently</span>
+          {profile.currently}
+        </p>
+      )}
+      {profile.bio && <p className="profile-header-bio">{profile.bio}</p>}
       {isOwnProfile ? (
-        <div>
-          <div>
+        <>
+          <div className="profile-header-counts">
             <Link to="/following">
               Following{!countsLoading && ` (${followingCount})`}
             </Link>
-            {' · '}
+            <span>·</span>
             <Link to="/followers">
               Followers{!countsLoading && ` (${followerCount})`}
             </Link>
           </div>
-          <button type="button" onClick={startEdit}>
-            Edit profile
-          </button>
-          <button type="button" onClick={handleLogout}>
-            Log out
-          </button>
-        </div>
+          <div className="profile-header-actions">
+            <button type="button" className="profile-header-button" onClick={startEdit}>
+              Edit profile
+            </button>
+            <button type="button" className="profile-header-button" onClick={handleLogout}>
+              Log out
+            </button>
+          </div>
+        </>
       ) : (
-        <FollowButton viewerId={viewerId} targetUserId={profile.id} />
+        <div className="profile-header-actions">
+          <FollowButton viewerId={viewerId} targetUserId={profile.id} />
+        </div>
       )}
     </div>
   );
