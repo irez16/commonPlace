@@ -1,0 +1,127 @@
+/* Contained nested-scroll: the Ledger has its own internal scroll area
+   with a fixed max height, rather than growing the whole page. A fade
+   gradient at the bottom cues "there's more below" without a hard cut. */
+.ledger-scroll-area {
+  position: relative;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.ledger-scroll-area::after {
+  content: '';
+  position: sticky;
+  display: block;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  margin-top: -32px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+}
+
+.ledger-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ledger-card {
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 14px;
+}
+
+.ledger-card-link-wrapper {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ledger-card-link-wrapper:hover {
+  text-decoration: none;
+}
+
+.ledger-card-meta {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ledger-card-pin-flag {
+  color: var(--accent);
+  display: inline-flex;
+}
+
+.ledger-card-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.ledger-card-creator {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.ledger-card-note {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0 0 8px;
+  /* Character-count truncation is applied via JS (clamped string), this
+     is just a visual backstop in case a short untruncated note still
+     wraps past two lines. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ledger-card-link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.ledger-card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.ledger-card-actions button {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ledger-card-actions button:hover {
+  color: var(--accent);
+}
+
+.ledger-empty,
+.ledger-loading {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+}

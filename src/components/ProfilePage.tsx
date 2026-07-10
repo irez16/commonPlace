@@ -4,9 +4,11 @@ import { usePublicProfile } from '../hooks/usePublicProfile';
 import ProfileHeader from './ProfileHeader';
 import AddLedgerEntry from './AddLedgerEntry';
 import LedgerList from './LedgerList';
+import PinPicker from './PinPicker';
 import AddWantToConsume from './AddWantToConsume';
 import WantToConsumeList from './WantToConsumeList';
 import type { Profile } from '../types';
+import './ProfilePage.css';
 
 export default function ProfilePage() {
   // React Router params must be a whole path segment — it can't mix a
@@ -45,7 +47,7 @@ export default function ProfilePage() {
   const contentEditable = isOwnProfile && isEditingContent;
 
   return (
-    <div>
+    <div className="profile-page">
       <ProfileHeader
         profile={displayedProfile}
         isOwnProfile={isOwnProfile}
@@ -53,58 +55,71 @@ export default function ProfilePage() {
         onProfileUpdated={setLiveProfile}
       />
 
-      <hr />
+      <hr className="profile-divider" />
 
-      <div>
-        <h2>Ledger</h2>
-        {isOwnProfile && (
-          <button
-            type="button"
-            onClick={() => setIsEditingContent((v) => !v)}
-          >
-            {isEditingContent ? 'Done' : 'Edit'}
-          </button>
+      <div className="profile-section">
+        <div className="profile-section-header">
+          <div className="profile-section-header-left">
+            <h2>Ledger</h2>
+            {isOwnProfile && (
+              <PinPicker
+                userId={displayedProfile.id}
+                pinnedId={displayedProfile.pinned_ledger_entry_id}
+                onPinnedChanged={(id) =>
+                  setLiveProfile({ ...displayedProfile, pinned_ledger_entry_id: id })
+                }
+              />
+            )}
+          </div>
+          {isOwnProfile && (
+            <button
+              type="button"
+              className="profile-section-edit-toggle"
+              onClick={() => setIsEditingContent((v) => !v)}
+            >
+              {isEditingContent ? 'Done' : 'Edit'}
+            </button>
+          )}
+        </div>
+
+        {contentEditable && (
+          <AddLedgerEntry
+            userId={displayedProfile.id}
+            onAdded={() => setLedgerRefreshKey((k) => k + 1)}
+          />
         )}
+
+        <LedgerList
+          userId={displayedProfile.id}
+          username={displayedProfile.username}
+          refreshKey={ledgerRefreshKey}
+          readOnly={!contentEditable}
+          pinnedId={displayedProfile.pinned_ledger_entry_id}
+          onPinnedChanged={(id) =>
+            setLiveProfile({ ...displayedProfile, pinned_ledger_entry_id: id })
+          }
+        />
+
+        <h2 style={{ marginTop: 20 }}>Want to Consume</h2>
+
+        {contentEditable && (
+          <AddWantToConsume
+            userId={displayedProfile.id}
+            onAdded={() => setWantRefreshKey((k) => k + 1)}
+          />
+        )}
+
+        <WantToConsumeList
+          userId={displayedProfile.id}
+          refreshKey={wantRefreshKey}
+          readOnly={!contentEditable}
+          onPromoted={() => setLedgerRefreshKey((k) => k + 1)}
+        />
       </div>
 
-      {contentEditable && (
-        <AddLedgerEntry
-          userId={displayedProfile.id}
-          onAdded={() => setLedgerRefreshKey((k) => k + 1)}
-        />
-      )}
+      <hr className="profile-divider" />
 
-      <LedgerList
-        userId={displayedProfile.id}
-        refreshKey={ledgerRefreshKey}
-        readOnly={!contentEditable}
-        pinnedId={displayedProfile.pinned_ledger_entry_id}
-        onPinnedChanged={(id) =>
-          setLiveProfile({ ...displayedProfile, pinned_ledger_entry_id: id })
-        }
-      />
-
-      <hr />
-
-      <h2>Want to Consume</h2>
-
-      {contentEditable && (
-        <AddWantToConsume
-          userId={displayedProfile.id}
-          onAdded={() => setWantRefreshKey((k) => k + 1)}
-        />
-      )}
-
-      <WantToConsumeList
-        userId={displayedProfile.id}
-        refreshKey={wantRefreshKey}
-        readOnly={!contentEditable}
-        onPromoted={() => setLedgerRefreshKey((k) => k + 1)}
-      />
-
-      <hr />
-
-      <Link to={`/@${displayedProfile.username}/journal`}>
+      <Link className="profile-journal-link" to={`/@${displayedProfile.username}/journal`}>
         {isOwnProfile ? 'Your Commonplace Journal' : `${displayedProfile.name}'s Commonplace Journal`}
       </Link>
     </div>

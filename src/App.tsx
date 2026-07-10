@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import QuickNav from './components/QuickNav';
 import Dashboard from './components/Dashboard';
 import ProfilePage from './components/ProfilePage';
+import LedgerEntryDetailPage from './components/LedgerEntryDetailPage';
 import FollowingPage from './components/FollowingPage';
 import FollowersPage from './components/FollowersPage';
 import FeedPage from './components/FeedPage';
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/followers" element={<FollowersPage />} />
         <Route path="/:handle/journal" element={<JournalPage />} />
+        <Route path="/:handle/ledger/:entryId" element={<LedgerEntryDetailPage />} />
         <Route path="/:handle" element={<ProfilePage />} />
       </Routes>
     </>

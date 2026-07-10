@@ -1,0 +1,106 @@
+.pin-picker-trigger {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-picker-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.pin-picker-sheet {
+  width: 100%;
+  max-width: 430px;
+  background: var(--bg-raised);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 16px 20px 28px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.pin-picker-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pin-picker-sheet-header h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--text);
+  margin: 0;
+}
+
+.pin-picker-sheet-header button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pin-picker-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.pin-picker-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.pin-picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 4px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.pin-picker-option:last-child {
+  border-bottom: none;
+}
+
+.pin-picker-option-title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.pin-picker-clear {
+  margin-top: 14px;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}

@@ -1,10 +1,43 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
+import './LedgerList.css';
+
+// Character-count truncation for the note/review shown on each card —
+// roughly 1.5-2 lines at the card's text size. Plain ellipsis, no
+// "read more" link; the locked design has the whole card tappable to
+// a full detail view instead (that detail page/route doesn't exist
+// yet — see note where cards render, below).
+const NOTE_TRUNCATE_LENGTH = 140;
+
+function truncateNote(note: string): string {
+  if (note.length <= NOTE_TRUNCATE_LENGTH) return note;
+  return note.slice(0, NOTE_TRUNCATE_LENGTH).trimEnd() + '…';
+}
+
+const MEDIA_TYPE_LABELS: Record<MediaType, string> = {
+  book: 'Book',
+  essay: 'Essay',
+  film: 'Film',
+  youtube: 'YouTube',
+  substack: 'Substack',
+  podcast: 'Podcast',
+};
+
+function formatConsumedDate(dateStr: string): string {
+  // consumed_date is stored as plain YYYY-MM-DD; parsing with the time
+  // fixed at noon avoids UTC/local timezone shifting it to the wrong day.
+  const date = new Date(`${dateStr}T12:00:00`);
+  return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
+}
 
 interface LedgerListProps {
   userId: string;
+  // Needed to build the /@username/ledger/:entryId link for each card —
+  // LedgerList doesn't fetch the profile itself.
+  username: string;
   refreshKey: number;
   readOnly?: boolean;
   // The currently pinned entry's id (lives on the profile — only one
@@ -27,6 +60,7 @@ interface EditDraft {
 
 export default function LedgerList({
   userId,
+  username,
   refreshKey,
   readOnly = false,
   pinnedId = null,
@@ -39,7 +73,6 @@ export default function LedgerList({
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [pinningId, setPinningId] = useState<string | null>(null);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -156,156 +189,147 @@ export default function LedgerList({
     if (id === pinnedId) onPinnedChanged?.(null);
   };
 
-  const togglePin = async (entry: LedgerEntry) => {
-    const isCurrentlyPinned = pinnedId === entry.id;
-    const newPinnedId = isCurrentlyPinned ? null : entry.id;
-
-    setPinningId(entry.id);
-    setError(null);
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ pinned_ledger_entry_id: newPinnedId })
-      .eq('id', userId);
-
-    setPinningId(null);
-
-    if (updateError) {
-      setError(updateError.message);
-      return;
-    }
-
-    onPinnedChanged?.(newPinnedId);
-  };
-
-  if (loading) return <p>Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
+  if (loading) return <p className="ledger-loading">Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
   if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
   if (entries.length === 0) {
-    return <p>Nothing in {readOnly ? 'the' : 'your'} ledger yet.</p>;
+    return <p className="ledger-empty">Nothing in {readOnly ? 'the' : 'your'} ledger yet.</p>;
   }
 
   return (
-    <ul>
-      {orderedEntries.map((entry) => {
-        const isEditing = !readOnly && editingId === entry.id;
-        const isPinned = pinnedId === entry.id;
+    <div className="ledger-scroll-area">
+      <ul className="ledger-list">
+        {orderedEntries.map((entry) => {
+          const isEditing = !readOnly && editingId === entry.id;
+          const isPinned = pinnedId === entry.id;
 
-        if (isEditing && editDraft) {
+          if (isEditing && editDraft) {
+            return (
+              <li key={entry.id}>
+                <select
+                  value={editDraft.media_type}
+                  onChange={(e) =>
+                    setEditDraft((d) => d && { ...d, media_type: e.target.value as MediaType })
+                  }
+                >
+                  {MEDIA_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={editDraft.title}
+                  onChange={(e) => setEditDraft((d) => d && { ...d, title: e.target.value })}
+                  placeholder="Title"
+                />
+                <input
+                  type="text"
+                  value={editDraft.creator}
+                  onChange={(e) => setEditDraft((d) => d && { ...d, creator: e.target.value })}
+                  placeholder="Author / director / host"
+                />
+                <input
+                  type="url"
+                  value={editDraft.url}
+                  onChange={(e) => setEditDraft((d) => d && { ...d, url: e.target.value })}
+                  placeholder="Link"
+                />
+                <input
+                  type="date"
+                  value={editDraft.consumed_date}
+                  onChange={(e) =>
+                    setEditDraft((d) => d && { ...d, consumed_date: e.target.value })
+                  }
+                />
+                <select
+                  value={editDraft.rating}
+                  onChange={(e) => setEditDraft((d) => d && { ...d, rating: e.target.value })}
+                >
+                  <option value="">—</option>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <textarea
+                  value={editDraft.note}
+                  onChange={(e) => setEditDraft((d) => d && { ...d, note: e.target.value })}
+                  placeholder="Note"
+                  rows={2}
+                />
+                <button
+                  type="button"
+                  onClick={() => saveEdit(entry.id)}
+                  disabled={savingId === entry.id}
+                >
+                  {savingId === entry.id ? 'Saving…' : 'Save'}
+                </button>
+                <button type="button" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </li>
+            );
+          }
+
           return (
-            <li key={entry.id}>
-              <select
-                value={editDraft.media_type}
-                onChange={(e) =>
-                  setEditDraft((d) => d && { ...d, media_type: e.target.value as MediaType })
-                }
-              >
-                {MEDIA_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={editDraft.title}
-                onChange={(e) => setEditDraft((d) => d && { ...d, title: e.target.value })}
-                placeholder="Title"
-              />
-              <input
-                type="text"
-                value={editDraft.creator}
-                onChange={(e) => setEditDraft((d) => d && { ...d, creator: e.target.value })}
-                placeholder="Author / director / host"
-              />
-              <input
-                type="url"
-                value={editDraft.url}
-                onChange={(e) => setEditDraft((d) => d && { ...d, url: e.target.value })}
-                placeholder="Link"
-              />
-              <input
-                type="date"
-                value={editDraft.consumed_date}
-                onChange={(e) =>
-                  setEditDraft((d) => d && { ...d, consumed_date: e.target.value })
-                }
-              />
-              <select
-                value={editDraft.rating}
-                onChange={(e) => setEditDraft((d) => d && { ...d, rating: e.target.value })}
-              >
-                <option value="">—</option>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                value={editDraft.note}
-                onChange={(e) => setEditDraft((d) => d && { ...d, note: e.target.value })}
-                placeholder="Note"
-                rows={2}
-              />
-              <button
-                type="button"
-                onClick={() => saveEdit(entry.id)}
-                disabled={savingId === entry.id}
-              >
-                {savingId === entry.id ? 'Saving…' : 'Save'}
-              </button>
-              <button type="button" onClick={cancelEdit}>
-                Cancel
-              </button>
+            <li key={entry.id} className="ledger-card">
+              <Link className="ledger-card-link-wrapper" to={`/@${username}/ledger/${entry.id}`}>
+                <div className="ledger-card-meta">
+                  {isPinned && (
+                    <span className="ledger-card-pin-flag" aria-label="Pinned">
+                      <svg width="12" height="12">
+                        <use href="/icons.svg#pin-solid" />
+                      </svg>
+                    </span>
+                  )}
+                  <span>{MEDIA_TYPE_LABELS[entry.media_type]}</span>
+                  <span>·</span>
+                  <span>{formatConsumedDate(entry.consumed_date)}</span>
+                  {entry.rating && (
+                    <>
+                      <span>·</span>
+                      <span>{entry.rating}/5</span>
+                    </>
+                  )}
+                </div>
+
+                <h3 className="ledger-card-title">{entry.title}</h3>
+                {entry.creator && <div className="ledger-card-creator">{entry.creator}</div>}
+
+                {entry.note && <p className="ledger-card-note">{truncateNote(entry.note)}</p>}
+              </Link>
+
+              {entry.url && (
+                <a
+                  className="ledger-card-link"
+                  href={entry.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View source
+                </a>
+              )}
+
+              {!readOnly && (
+                <div className="ledger-card-actions">
+                  <button type="button" onClick={() => startEdit(entry)}>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteEntry(entry.id)}
+                    disabled={deletingId === entry.id}
+                  >
+                    {deletingId === entry.id ? 'Deleting…' : 'Delete'}
+                  </button>
+                </div>
+              )}
             </li>
           );
-        }
-
-        return (
-          <li key={entry.id}>
-            {isPinned && <span aria-label="Pinned">📌 </span>}
-            <strong>{entry.title}</strong>
-            {entry.creator && ` — ${entry.creator}`}
-            <div>
-              <span>{entry.media_type}</span> · <span>{entry.consumed_date}</span>
-              {entry.rating && (
-                <>
-                  {' '}
-                  · <span>{entry.rating}/5</span>
-                </>
-              )}
-            </div>
-            {entry.note && <p>{entry.note}</p>}
-            {entry.url && (
-              <a href={entry.url} target="_blank" rel="noreferrer">
-                View source
-              </a>
-            )}
-            {!readOnly && (
-              <div>
-                <button
-                  type="button"
-                  onClick={() => togglePin(entry)}
-                  disabled={pinningId === entry.id}
-                  aria-pressed={isPinned}
-                >
-                  {pinningId === entry.id ? '…' : isPinned ? 'Unpin' : 'Pin'}
-                </button>
-                <button type="button" onClick={() => startEdit(entry)}>
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteEntry(entry.id)}
-                  disabled={deletingId === entry.id}
-                >
-                  {deletingId === entry.id ? 'Deleting…' : 'Delete'}
-                </button>
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+        })}
+      </ul>
+    </div>
   );
 }

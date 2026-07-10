@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { WantToConsumeItem } from '../types';
+import './WantToConsumeList.css';
 
 interface WantToConsumeListProps {
   userId: string;
@@ -150,92 +151,96 @@ export default function WantToConsumeList({
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  if (loading) return <p>Loading {readOnly ? 'list' : 'your list'}…</p>;
+  if (loading) return <p className="wtc-empty">Loading {readOnly ? 'list' : 'your list'}…</p>;
   if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
   if (items.length === 0) {
-    return <p>Nothing on {readOnly ? 'the' : 'your'} Want to Consume list yet.</p>;
+    return <p className="wtc-empty">Nothing on {readOnly ? 'the' : 'your'} Want to Consume list yet.</p>;
   }
 
   return (
     <>
-      <ul>
+      <ul className="wtc-list">
         {visibleItems.map((item) => {
           const isPromoting = promoteDraftId === item.id;
 
-          return (
-            <li key={item.id}>
-              <strong>{item.title}</strong>
-              {item.creator && ` — ${item.creator}`}
-              <div>
-                <span>{item.media_type}</span>
-                {!item.is_public && <> · <span>private</span></>}
-              </div>
-              {item.note && <p>{item.note}</p>}
-              {item.url && (
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  View source
-                </a>
-              )}
-
-              {readOnly ? null : isPromoting ? (
-                <div>
-                  <p>How was it?</p>
-                  <label>
-                    Date finished
-                    <input
-                      type="date"
-                      value={promoteDraft.consumed_date}
-                      onChange={(e) =>
-                        setPromoteDraft((d) => ({ ...d, consumed_date: e.target.value }))
-                      }
-                    />
-                  </label>
-                  <label>
-                    Rating (optional)
-                    <select
-                      value={promoteDraft.rating}
-                      onChange={(e) =>
-                        setPromoteDraft((d) => ({ ...d, rating: e.target.value }))
-                      }
-                    >
-                      <option value="">—</option>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <textarea
-                    placeholder="What did you think? (optional)"
-                    value={promoteDraft.note}
+          if (isPromoting) {
+            return (
+              <li key={item.id} className="wtc-promote-form">
+                <p className="wtc-row-title">{item.title} — how was it?</p>
+                <label>
+                  Date finished
+                  <input
+                    type="date"
+                    value={promoteDraft.consumed_date}
                     onChange={(e) =>
-                      setPromoteDraft((d) => ({ ...d, note: e.target.value }))
+                      setPromoteDraft((d) => ({ ...d, consumed_date: e.target.value }))
                     }
-                    rows={3}
                   />
+                </label>
+                <label>
+                  Rating (optional)
+                  <select
+                    value={promoteDraft.rating}
+                    onChange={(e) =>
+                      setPromoteDraft((d) => ({ ...d, rating: e.target.value }))
+                    }
+                  >
+                    <option value="">—</option>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <textarea
+                  placeholder="What did you think? (optional)"
+                  value={promoteDraft.note}
+                  onChange={(e) =>
+                    setPromoteDraft((d) => ({ ...d, note: e.target.value }))
+                  }
+                  rows={3}
+                />
+                <div className="wtc-row-actions">
                   <button
                     type="button"
                     onClick={() => confirmPromote(item)}
                     disabled={promotingId === item.id}
                   >
-                    {promotingId === item.id ? 'Adding to ledger…' : 'Add to ledger'}
+                    {promotingId === item.id ? 'Adding…' : 'Add to ledger'}
                   </button>
                   <button type="button" onClick={cancelPromote}>
                     Cancel
                   </button>
                 </div>
-              ) : (
-                <div>
+              </li>
+            );
+          }
+
+          return (
+            <li key={item.id} className="wtc-row">
+              <div className="wtc-row-main">
+                <div className="wtc-row-title">
+                  {item.title}
+                  {item.creator && ` — ${item.creator}`}
+                </div>
+                <div className="wtc-row-meta">
+                  {item.media_type}
+                  {!item.is_public && ' · private'}
+                </div>
+              </div>
+
+              {readOnly ? null : (
+                <div className="wtc-row-actions">
                   <button type="button" onClick={() => openPromoteForm(item)}>
-                    Mark as consumed
+                    Consumed
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteItem(item.id)}
                     disabled={deletingId === item.id}
                   >
-                    {deletingId === item.id ? 'Removing…' : 'Remove'}
+                    {deletingId === item.id ? '…' : 'Remove'}
                   </button>
                 </div>
               )}
@@ -244,8 +249,8 @@ export default function WantToConsumeList({
         })}
       </ul>
       {readOnly && !expanded && items.length > PREVIEW_SIZE && (
-        <button type="button" onClick={() => setExpanded(true)}>
-          See all
+        <button type="button" className="wtc-see-all" onClick={() => setExpanded(true)}>
+          See all ({items.length})
         </button>
       )}
     </>

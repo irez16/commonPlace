@@ -1,111 +1,180 @@
+/* ============================================================
+   CommonPlace design system — "Reading Room" (light / base)
+   Locked direction: bone paper background, left accent-stripe
+   headers, Fraunces serif for titles & quotes, IBM Plex Mono
+   uppercase for metadata/chips, Inter for body text.
+
+   Dark mode is intentionally NOT defined yet — that's a
+   dedicated design step. Only light-mode tokens exist below.
+   ============================================================ */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* --- Surface & text --- */
+  --bg: #EAE4D6;              /* bone / paper */
+  --bg-raised: #F4F0E6;       /* slightly lighter, for cards sitting on --bg */
+  --text: #2A2622;            /* warm near-black, not pure black (paper feel) */
+  --text-muted: #6B6357;      /* secondary text, metadata that isn't mono-styled */
+  --border: #D8D0BC;          /* hairline borders against bone paper */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* --- Accent (user-selectable, wine is default) --- */
+  --accent: #7A3B3B;          /* wine / oxblood — default */
+  --accent-ink: #1F3A54;      /* ink-blue — alternative option */
+  --accent-moss: #6B7156;     /* moss green — alternative option */
+  --accent-contrast: #F4F0E6; /* text/icon color when sitting on solid --accent */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
+  /* --- Marginalia (Journal annotation color, separate from Ledger accent) --- */
+  --marginalia: #1F3A54;      /* navy/ink-blue, fixed regardless of Ledger accent */
+
+  /* --- Fonts --- */
+  --font-serif: 'Fraunces', Georgia, serif;       /* titles, quotes */
+  --font-sans: 'Inter', system-ui, sans-serif;    /* body text */
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace; /* metadata, chips, uppercase labels */
+
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 145%;
   color: var(--text);
   background: var(--bg);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
+#root {
+  width: 100%;
+  max-width: 430px; /* comfortably wraps the iPhone 13 (390pt) reference frame */
+  margin: 0 auto;
+  min-height: 100svh;
+  background: var(--bg);
+}
+
+/* --- Headings & titles: Fraunces --- */
+h1, h2, h3 {
+  font-family: var(--font-serif);
   font-weight: 500;
-  color: var(--text-h);
+  color: var(--text);
+  margin: 0 0 8px;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 28px;
+  letter-spacing: -0.2px;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 22px;
+  letter-spacing: -0.1px;
 }
+
+h3 {
+  font-size: 18px;
+}
+
 p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* --- Quotes: Fraunces italic --- */
+blockquote, .quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* --- Metadata / chips / labels: IBM Plex Mono, uppercase, tracked out --- */
+.meta, .chip, .label, .metadata {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: var(--font-sans);
+}
+
+/* ============================================================
+   Dark mode — "ink and paper at night", not a generic dark UI.
+   Warm charcoal background, off-white (never pure white) text,
+   accents brightened for contrast against the dark surface.
+
+   Applies automatically based on system preference. Also
+   supports a manual override via [data-theme="dark"] on <html>,
+   for the eventual Settings toggle — that attribute isn't wired
+   up to any UI yet, but the CSS is ready for it.
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1C1A17;
+    --bg-raised: #262319;
+    --text: #EDE8DD;
+    --text-muted: #9C9384;
+    --border: #3A352E;
+
+    --accent: #B05C5C;
+    --accent-ink: #4A7BA6;
+    --accent-moss: #8B9373;
+    --accent-contrast: #1C1A17;
+
+    --marginalia: #4A7BA6;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1C1A17;
+  --bg-raised: #262319;
+  --text: #EDE8DD;
+  --text-muted: #9C9384;
+  --border: #3A352E;
+
+  --accent: #B05C5C;
+  --accent-ink: #4A7BA6;
+  --accent-moss: #8B9373;
+  --accent-contrast: #1C1A17;
+
+  --marginalia: #4A7BA6;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #EAE4D6;
+  --bg-raised: #F4F0E6;
+  --text: #2A2622;
+  --text-muted: #6B6357;
+  --border: #D8D0BC;
+
+  --accent: #7A3B3B;
+  --accent-ink: #1F3A54;
+  --accent-moss: #6B7156;
+  --accent-contrast: #F4F0E6;
+
+  --marginalia: #1F3A54;
+
+  color-scheme: light;
 }
