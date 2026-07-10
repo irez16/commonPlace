@@ -17,13 +17,13 @@
   --border: #D8D0BC;          /* hairline borders against bone paper */
 
   /* --- Accent (user-selectable, wine is default) --- */
-  --accent: #7A3B3B;          /* wine / oxblood — default */
-  --accent-ink: #1F3A54;      /* ink-blue — alternative option */
-  --accent-moss: #6B7156;     /* moss green — alternative option */
+  --accent: #8C4444;          /* wine / oxblood — default */
+  --accent-ink: #2B577D;      /* ink-blue — alternative option */
+  --accent-moss: #5D7249;     /* moss green — alternative option */
   --accent-contrast: #F4F0E6; /* text/icon color when sitting on solid --accent */
 
   /* --- Marginalia (Journal annotation color, separate from Ledger accent) --- */
-  --marginalia: #1F3A54;      /* navy/ink-blue, fixed regardless of Ledger accent */
+  --marginalia: #2B577D;      /* navy/ink-blue, fixed regardless of Ledger accent */
 
   /* --- Fonts --- */
   --font-serif: 'Fraunces', Georgia, serif;       /* titles, quotes */
