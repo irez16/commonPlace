@@ -140,11 +140,11 @@ button {
     --border: #3A352E;
 
     --accent: #B05C5C;
-    --accent-ink: #4A7BA6;
+    --accent-ink: #86AEDD;
     --accent-moss: #8B9373;
     --accent-contrast: #1C1A17;
 
-    --marginalia: #4A7BA6;
+    --marginalia: #86AEDD;
 
     color-scheme: dark;
   }
@@ -158,11 +158,11 @@ button {
   --border: #3A352E;
 
   --accent: #B05C5C;
-  --accent-ink: #4A7BA6;
+  --accent-ink: #86AEDD;
   --accent-moss: #8B9373;
   --accent-contrast: #1C1A17;
 
-  --marginalia: #4A7BA6;
+  --marginalia: #86AEDD;
 
   color-scheme: dark;
 }

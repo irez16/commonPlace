@@ -1,11 +1,21 @@
 .quick-nav {
   position: fixed;
   top: 12px;
-  right: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px;
   z-index: 900;
+  /* The wrapper spans the full column width just to do the centering
+     math, but shouldn't itself intercept clicks outside the pill. */
+  pointer-events: none;
 }
 
 .quick-nav a {
+  pointer-events: auto;
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
