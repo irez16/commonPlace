@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import QuickNav from './components/QuickNav';
+import TabBar from './components/TabBar';
 import Dashboard from './components/Dashboard';
 import ProfilePage from './components/ProfilePage';
 import LedgerEntryDetailPage from './components/LedgerEntryDetailPage';
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/:handle/ledger/:entryId" element={<LedgerEntryDetailPage />} />
         <Route path="/:handle" element={<ProfilePage />} />
       </Routes>
+      <TabBar />
     </>
   );
 }
