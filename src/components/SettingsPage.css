@@ -37,6 +37,46 @@
   gap: 14px;
 }
 
+.settings-toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.settings-toggle.is-selected {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.settings-font-select {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 10px;
+}
+
+.settings-font-preview {
+  margin-top: 12px;
+  font-size: 24px;
+  color: var(--marginalia);
+}
+
 .settings-swatch {
   display: flex;
   flex-direction: column;
@@ -67,53 +107,11 @@
   color: var(--text-muted);
 }
 
-.settings-font-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.settings-font-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 14px;
-  cursor: pointer;
-  color: var(--marginalia);
-  font-size: 22px;
-}
-
-.settings-font-option.is-selected {
-  border-color: var(--marginalia);
-}
-
-.settings-font-option-check {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--marginalia);
-}
-
 .settings-save-row {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 28px;
-}
-
-.settings-save-button {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border: none;
-  border-radius: 6px;
-  padding: 9px 20px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 12px;
-  cursor: pointer;
 }
 
 .settings-save-status {
