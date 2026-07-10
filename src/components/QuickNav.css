@@ -7,22 +7,41 @@
   max-width: 430px;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 0 16px;
   z-index: 900;
   /* The wrapper spans the full column width just to do the centering
-     math, but shouldn't itself intercept clicks outside the pill. */
+     math, but shouldn't itself intercept clicks outside the icons. */
   pointer-events: none;
 }
 
-.quick-nav a {
+.quick-nav-icon {
   pointer-events: auto;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 11px;
-  color: var(--accent);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   background: var(--bg-raised);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 10px;
+  color: var(--text-muted);
+}
+
+.quick-nav-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
