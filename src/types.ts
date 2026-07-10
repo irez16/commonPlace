@@ -40,6 +40,10 @@ export interface Profile {
   journal_font: string | null;
   journal_layout: string | null;
   pinned_ledger_entry_id: string | null;
+  // Requires a migration — see settings_migration.sql. Not null: the
+  // DB column has a default of 'wine', same as every profile had
+  // implicitly before this column existed.
+  ledger_accent: 'wine' | 'ink' | 'moss';
   created_at: string;
 }
 

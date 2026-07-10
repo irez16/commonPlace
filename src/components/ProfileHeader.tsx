@@ -168,6 +168,9 @@ export default function ProfileHeader({
             <button type="button" className="profile-header-button" onClick={startEdit}>
               Edit profile
             </button>
+            <Link className="profile-header-button" to="/settings">
+              Settings
+            </Link>
             <button type="button" className="profile-header-button" onClick={handleLogout}>
               Log out
             </button>

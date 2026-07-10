@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { usePublicProfile } from '../hooks/usePublicProfile';
+import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import type { LedgerEntry, MediaType } from '../types';
 import './LedgerEntryDetailPage.css';
 
@@ -69,8 +70,12 @@ export default function LedgerEntryDetailPage() {
   if (error) return <p className="ledger-detail-status" style={{ color: 'crimson' }}>{error}</p>;
   if (notFound || !entry) return <p className="ledger-detail-status">Entry not found.</p>;
 
+  const pageStyle: CSSProperties & Record<string, string> = {
+    '--ledger-accent': resolveLedgerAccent(profile?.ledger_accent),
+  };
+
   return (
-    <div className="ledger-detail-page">
+    <div className="ledger-detail-page" style={pageStyle}>
       <Link className="ledger-detail-back" to={username ? `/@${username}` : '/'}>
         ← {profile ? profile.name : 'Back to profile'}
       </Link>

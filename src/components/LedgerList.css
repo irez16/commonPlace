@@ -30,7 +30,7 @@
 }
 
 .ledger-card {
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--ledger-accent, var(--accent));
   padding: 4px 0 4px 14px;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .ledger-card-pin-flag {
-  color: var(--accent);
+  color: var(--ledger-accent, var(--accent));
   display: inline-flex;
 }
 

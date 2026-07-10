@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePublicProfile } from '../hooks/usePublicProfile';
+import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import ProfileHeader from './ProfileHeader';
 import AddLedgerEntry from './AddLedgerEntry';
 import LedgerList from './LedgerList';
@@ -46,8 +47,12 @@ export default function ProfilePage() {
   const displayedProfile = liveProfile || profile;
   const contentEditable = isOwnProfile && isEditingContent;
 
+  const pageStyle: CSSProperties & Record<string, string> = {
+    '--ledger-accent': resolveLedgerAccent(displayedProfile.ledger_accent),
+  };
+
   return (
-    <div className="profile-page">
+    <div className="profile-page" style={pageStyle}>
       <ProfileHeader
         profile={displayedProfile}
         isOwnProfile={isOwnProfile}

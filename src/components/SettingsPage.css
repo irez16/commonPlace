@@ -1,0 +1,129 @@
+.settings-page {
+  padding: 20px 20px 60px;
+}
+
+.settings-page-breadcrumb {
+  display: block;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.settings-page h1 {
+  margin-bottom: 4px;
+}
+
+.settings-section {
+  margin-top: 28px;
+}
+
+.settings-section h2 {
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.settings-section-hint {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+}
+
+.settings-swatch-row {
+  display: flex;
+  gap: 14px;
+}
+
+.settings-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.settings-swatch-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.settings-swatch.is-selected .settings-swatch-dot {
+  border-color: var(--text);
+}
+
+.settings-swatch-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.settings-font-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-font-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: var(--marginalia);
+  font-size: 22px;
+}
+
+.settings-font-option.is-selected {
+  border-color: var(--marginalia);
+}
+
+.settings-font-option-check {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--marginalia);
+}
+
+.settings-save-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.settings-save-button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-save-status {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.settings-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--accent);
+}

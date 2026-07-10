@@ -54,6 +54,24 @@
   margin: 4px 0 12px;
 }
 
+/* The stored ink color (default navy, or whatever a user picks in
+   Settings) is calibrated for bone paper — it doesn't stay readable
+   against a dark background no matter what the color is. Rather than
+   trying to computationally brighten an arbitrary stored color, dark
+   mode just overrides the rendered color to the theme's off-white
+   text color. The underlying --passage-accent/--marginalia value is
+   untouched, so switching back to light mode reverts to exactly the
+   color that was actually selected. */
+@media (prefers-color-scheme: dark) {
+  .passage-card-annotation {
+    color: var(--text);
+  }
+}
+
+:root[data-theme="dark"] .passage-card-annotation {
+  color: var(--text);
+}
+
 .passage-card-source {
   font-family: var(--font-mono);
   text-transform: uppercase;
