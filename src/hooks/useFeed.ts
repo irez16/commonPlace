@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import type { LedgerEntry, Profile } from '../types';
 
 export interface FeedEntry extends LedgerEntry {
-  author: Pick<Profile, 'id' | 'username' | 'name' | 'avatar_url'>;
+  author: Pick<Profile, 'id' | 'username' | 'name' | 'avatar_url' | 'ledger_accent'>;
 }
 
 interface FeedState {
@@ -86,7 +86,7 @@ export function useFeed(): FeedState {
 
     const { data: profileRows, error: profileError } = await supabase
       .from('public_profiles')
-      .select('id, username, name, avatar_url')
+      .select('id, username, name, avatar_url, ledger_accent')
       .in('id', authorIds);
 
     setLoading(false);

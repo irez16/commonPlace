@@ -3,17 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
-import type { LedgerEntry, MediaType } from '../types';
+import type { LedgerEntry } from '../types';
+import { MEDIA_TYPE_LABELS } from '../types';
 import './LedgerEntryDetailPage.css';
-
-const MEDIA_TYPE_LABELS: Record<MediaType, string> = {
-  book: 'Book',
-  essay: 'Essay',
-  film: 'Film',
-  youtube: 'YouTube',
-  substack: 'Substack',
-  podcast: 'Podcast',
-};
 
 function formatConsumedDate(dateStr: string): string {
   const date = new Date(`${dateStr}T12:00:00`);

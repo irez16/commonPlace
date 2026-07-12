@@ -5,6 +5,7 @@ import type { InCommonNotification } from '../types';
 export interface NotificationItem extends InCommonNotification {
   otherUser: { username: string; name: string } | null;
   clippedText: string | null;
+  entryId: string | null;
   entryTitle: string | null;
   entryCreator: string | null;
 }
@@ -112,6 +113,7 @@ export function useNotifications(): NotificationsState {
         ...n,
         otherUser: otherProfile ? { username: otherProfile.username, name: otherProfile.name } : null,
         clippedText: myPassage?.clipped_text ?? null,
+        entryId: entry?.id ?? null,
         entryTitle: entry?.title ?? null,
         entryCreator: entry?.creator ?? null,
       };

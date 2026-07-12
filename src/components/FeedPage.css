@@ -1,0 +1,99 @@
+.feed-page {
+  padding: 20px 20px 60px;
+}
+
+.feed-page h1 {
+  margin-bottom: 18px;
+}
+
+.feed-status {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.feed-status a {
+  color: var(--accent);
+}
+
+.feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.feed-card {
+  border-left: 5px solid var(--feed-card-accent, var(--accent));
+  padding: 4px 0 4px 16px;
+}
+
+.feed-card-byline {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--feed-card-accent, var(--accent));
+  margin-bottom: 6px;
+}
+
+.feed-card-link-wrapper {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.feed-card-meta {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.feed-card-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.feed-card-creator {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.feed-card-note {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feed-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.feed-card-link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}

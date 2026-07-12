@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { FeedEntry } from '../hooks/useFeed';
+import './SaveToListButton.css';
 
 interface SaveToListButtonProps {
   viewerId: string;
@@ -64,14 +65,19 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
     setIsSaved(true);
   };
 
-  if (loading) return <button type="button" disabled>…</button>;
+  if (loading) return <button type="button" className="save-to-list-button" disabled>…</button>;
 
   return (
     <div>
-      <button type="button" onClick={save} disabled={isSaved || working}>
+      <button
+        type="button"
+        className={`save-to-list-button${isSaved ? ' is-saved' : ''}`}
+        onClick={save}
+        disabled={isSaved || working}
+      >
         {working ? '…' : isSaved ? 'Saved' : 'Save to list'}
       </button>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="save-to-list-error">{error}</p>}
     </div>
   );
 }

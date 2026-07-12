@@ -15,6 +15,15 @@ export const MEDIA_TYPES: MediaType[] = [
   'podcast',
 ];
 
+export const MEDIA_TYPE_LABELS: Record<MediaType, string> = {
+  book: 'Book',
+  essay: 'Essay',
+  film: 'Film',
+  youtube: 'YouTube',
+  substack: 'Substack',
+  podcast: 'Podcast',
+};
+
 export interface LedgerEntry {
   id: string;
   user_id: string;

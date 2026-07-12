@@ -1,34 +1,42 @@
 import { Link } from 'react-router-dom';
 import { useFollowList } from '../hooks/useFollowList';
+import { useProfileStatus } from '../hooks/useProfileStatus';
+import './FollowListPage.css';
 
 export default function FollowersPage() {
   const { loading, needsAuth, error, profiles } = useFollowList('followers');
+  const { username } = useProfileStatus();
 
-  if (loading) return <p>Loading…</p>;
+  if (loading) return <div className="follow-list-page"><p className="follow-list-status">Loading…</p></div>;
 
   if (needsAuth) {
     return (
-      <div>
-        <p>Log in to see your followers.</p>
+      <div className="follow-list-page">
+        <p className="follow-list-status">Log in to see your followers.</p>
         <Link to="/">Go home</Link>
       </div>
     );
   }
 
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <div className="follow-list-page"><p className="follow-list-status" style={{ color: 'crimson' }}>{error}</p></div>;
 
   return (
-    <div>
+    <div className="follow-list-page">
+      {username && (
+        <Link className="follow-list-breadcrumb" to={`/@${username}`}>
+          ← @{username}
+        </Link>
+      )}
       <h1>Followers</h1>
-      <Link to="/">Back to your profile</Link>
       {profiles.length === 0 ? (
-        <p>No followers yet.</p>
+        <p className="follow-list-status">No followers yet.</p>
       ) : (
-        <ul>
+        <ul className="follow-list">
           {profiles.map((p) => (
             <li key={p.id}>
-              <Link to={`/@${p.username}`}>
-                {p.name} (@{p.username})
+              <Link className="follow-list-row" to={`/@${p.username}`}>
+                <div className="follow-list-row-name">{p.name}</div>
+                <div className="follow-list-row-username">@{p.username}</div>
               </Link>
             </li>
           ))}

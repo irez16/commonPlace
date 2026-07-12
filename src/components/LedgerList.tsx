@@ -1,30 +1,10 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { MEDIA_TYPES } from '../types';
+import { MEDIA_TYPES, MEDIA_TYPE_LABELS } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
+import { truncateNote } from '../lib/text';
 import './LedgerList.css';
-
-// Character-count truncation for the note/review shown on each card —
-// roughly 1.5-2 lines at the card's text size. Plain ellipsis, no
-// "read more" link; the locked design has the whole card tappable to
-// a full detail view instead (that detail page/route doesn't exist
-// yet — see note where cards render, below).
-const NOTE_TRUNCATE_LENGTH = 140;
-
-function truncateNote(note: string): string {
-  if (note.length <= NOTE_TRUNCATE_LENGTH) return note;
-  return note.slice(0, NOTE_TRUNCATE_LENGTH).trimEnd() + '…';
-}
-
-const MEDIA_TYPE_LABELS: Record<MediaType, string> = {
-  book: 'Book',
-  essay: 'Essay',
-  film: 'Film',
-  youtube: 'YouTube',
-  substack: 'Substack',
-  podcast: 'Podcast',
-};
 
 function formatConsumedDate(dateStr: string): string {
   // consumed_date is stored as plain YYYY-MM-DD; parsing with the time
