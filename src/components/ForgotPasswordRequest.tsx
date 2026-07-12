@@ -1,0 +1,82 @@
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { supabase } from '../lib/supabaseClient';
+
+interface ForgotPasswordRequestProps {
+  onBackToLogin?: () => void;
+}
+
+// Step one of the reset flow: collect the email, ask Supabase to send a
+// reset link. Step two (actually setting the new password) happens on
+// whatever page that emailed link points to — see ResetPasswordPage.
+export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordRequestProps) {
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setLoading(false);
+
+    // Deliberately not distinguishing "no account with that email" from
+    // success — confirming which emails have accounts is an information
+    // leak. Supabase's client already doesn't error on unknown emails
+    // for this call, so this mostly covers network/rate-limit failures.
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+
+    setSent(true);
+  };
+
+  if (sent) {
+    return (
+      <div>
+        <h2>Check your email</h2>
+        <p>
+          If there's an account for {email}, a password reset link is on its way. It'll
+          expire after a while, so use it soon.
+        </p>
+        {onBackToLogin && (
+          <button type="button" onClick={onBackToLogin}>
+            Back to log in
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2>Reset your password</h2>
+      <p>Enter your email and we'll send you a link to set a new password.</p>
+      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <button type="submit" disabled={loading}>
+        {loading ? 'Sending…' : 'Send reset link'}
+      </button>
+      {onBackToLogin && (
+        <p>
+          <button type="button" onClick={onBackToLogin}>
+            Back to log in
+          </button>
+        </p>
+      )}
+    </form>
+  );
+}

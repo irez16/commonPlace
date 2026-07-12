@@ -3,14 +3,16 @@ import { Navigate } from 'react-router-dom';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import SignUp from './SignUp';
 import Login from './Login';
+import ForgotPasswordRequest from './ForgotPasswordRequest';
 
 export default function Dashboard() {
   const { loading, user, hasProfile, username } = useProfileStatus();
-  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot'>('login');
 
   if (loading) return <p>Loading…</p>;
 
-  // Not logged in at all → show login or signup, toggle between them
+  // Not logged in at all → show login, signup, or the forgot-password
+  // request form, toggling between them.
   if (!user) {
     if (authView === 'signup') {
       return (
@@ -25,10 +27,14 @@ export default function Dashboard() {
         </>
       );
     }
+    if (authView === 'forgot') {
+      return <ForgotPasswordRequest onBackToLogin={() => setAuthView('login')} />;
+    }
     return (
       <Login
         onComplete={() => window.location.reload()}
         onSwitchToSignUp={() => setAuthView('signup')}
+        onForgotPassword={() => setAuthView('forgot')}
       />
     );
   }

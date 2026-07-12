@@ -5,9 +5,10 @@ import { supabase } from '../lib/supabaseClient';
 interface LoginProps {
   onComplete?: () => void;
   onSwitchToSignUp?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export default function Login({ onComplete, onSwitchToSignUp }: LoginProps) {
+export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,14 @@ export default function Login({ onComplete, onSwitchToSignUp }: LoginProps) {
       <button type="submit" disabled={loading}>
         {loading ? 'Logging in…' : 'Log in'}
       </button>
+
+      {onForgotPassword && (
+        <p>
+          <button type="button" onClick={onForgotPassword}>
+            Forgot password?
+          </button>
+        </p>
+      )}
 
       {onSwitchToSignUp && (
         <p>

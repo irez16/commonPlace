@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useProfileStatus } from '../hooks/useProfileStatus';
@@ -23,6 +24,12 @@ export default function SettingsPage() {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>('system');
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState<SaveStatus>('idle');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     if (fetchedProfile) setProfile(fetchedProfile);
@@ -69,6 +76,61 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const changePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords don't match.");
+      return;
+    }
+
+    setPasswordStatus('saving');
+
+    // Re-verify the current password before allowing the change, even
+    // though the active session alone would technically let Supabase
+    // accept the update — this is the safety check that stops someone
+    // at an already-unlocked device from silently taking over the
+    // account. signInWithPassword also just refreshes the session, so
+    // this is harmless if it succeeds.
+    const { data: userData } = await supabase.auth.getUser();
+    const email = userData.user?.email;
+
+    if (!email) {
+      setPasswordStatus('error');
+      setPasswordError("Couldn't verify your account email — try logging in again.");
+      return;
+    }
+
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+
+    if (verifyError) {
+      setPasswordStatus('error');
+      setPasswordError('Current password is incorrect.');
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (updateError) {
+      setPasswordStatus('error');
+      setPasswordError(updateError.message);
+      return;
+    }
+
+    setPasswordStatus('saved');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -168,6 +230,48 @@ export default function SettingsPage() {
         {status === 'saving' && <span className="settings-save-status">Saving…</span>}
         {status === 'saved' && <span className="settings-save-status">Saved.</span>}
         {status === 'error' && <span className="settings-error">{errorMessage}</span>}
+      </div>
+
+      <div className="settings-section">
+        <h2>Change password</h2>
+        <form className="settings-password-form" onSubmit={changePassword}>
+          <input
+            type="password"
+            placeholder="Current password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="New password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <div className="settings-save-row">
+            <button
+              type="submit"
+              className="settings-toggle"
+              disabled={passwordStatus === 'saving'}
+            >
+              {passwordStatus === 'saving' ? 'Updating…' : 'Update password'}
+            </button>
+            {passwordStatus === 'saved' && (
+              <span className="settings-save-status">Password updated.</span>
+            )}
+            {passwordStatus === 'error' && (
+              <span className="settings-error">{passwordError}</span>
+            )}
+          </div>
+        </form>
       </div>
 
       <div className="settings-section">

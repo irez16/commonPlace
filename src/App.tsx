@@ -10,6 +10,7 @@ import FeedPage from './components/FeedPage';
 import JournalPage from './components/JournalPage';
 import NotificationsPage from './components/NotificationsPage';
 import SettingsPage from './components/SettingsPage';
+import ResetPasswordPage from './components/ResetPasswordPage';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/followers" element={<FollowersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/:handle/journal" element={<JournalPage />} />
         <Route path="/:handle/ledger/:entryId" element={<LedgerEntryDetailPage />} />
         <Route path="/:handle" element={<ProfilePage />} />
