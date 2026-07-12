@@ -6,6 +6,7 @@ import type { MediaType, WantToConsumeItem } from '../types';
 import MediaSearchField, { supportsSearch } from './MediaSearchField';
 import LinkAutofillField from './LinkAutofillField';
 import type { MediaSearchResult } from '../lib/mediaSearch';
+import './AppForm.css';
 
 const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
@@ -80,9 +81,9 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <h3>Add to Want to Consume</h3>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
 
       <label>
         Type
@@ -143,7 +144,7 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
         rows={3}
       />
 
-      <div>
+      <div className="app-form-checkbox-row">
         <input
           id="is-public"
           type="checkbox"
@@ -153,7 +154,7 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
         <label htmlFor="is-public">Public (visible on your profile)</label>
       </div>
 
-      <button type="submit" disabled={loading}>
+      <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Adding…' : 'Add to list'}
       </button>
     </form>

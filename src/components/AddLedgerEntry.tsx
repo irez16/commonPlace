@@ -6,6 +6,7 @@ import type { MediaType, LedgerEntry } from '../types';
 import MediaSearchField, { supportsSearch } from './MediaSearchField';
 import LinkAutofillField from './LinkAutofillField';
 import type { MediaSearchResult } from '../lib/mediaSearch';
+import './AppForm.css';
 
 const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
@@ -85,9 +86,9 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <h3>Add to your ledger</h3>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
 
       <label>
         Type
@@ -170,7 +171,7 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
         rows={3}
       />
 
-      <button type="submit" disabled={loading}>
+      <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Adding…' : 'Add entry'}
       </button>
     </form>

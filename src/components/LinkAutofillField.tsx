@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import './AppForm.css';
 
 interface LinkMetadata {
   title: string | null;
@@ -61,10 +62,15 @@ export default function LinkAutofillField({ url, onUrlChange, onFetched }: LinkA
           }}
         />
       </label>
-      <button type="button" onClick={fetchDetails} disabled={loading}>
+      <button
+        type="button"
+        className="app-form-secondary-button"
+        onClick={fetchDetails}
+        disabled={loading}
+      >
         {loading ? 'Fetching…' : 'Fetch details'}
       </button>
-      {error && <p style={{ color: 'crimson', fontSize: '0.85em' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
     </div>
   );
 }

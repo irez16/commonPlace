@@ -7,6 +7,7 @@ import type { ClipType, LedgerEntry, MediaType, Passage } from '../types';
 import MediaSearchField, { supportsSearch } from './MediaSearchField';
 import LinkAutofillField from './LinkAutofillField';
 import type { MediaSearchResult } from '../lib/mediaSearch';
+import './AppForm.css';
 
 const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 
@@ -241,10 +242,10 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
     notifyInCommonMatches(newPassage).catch(() => {});
   };
 
-  if (optionsLoading) return <p>Loading your ledger…</p>;
+  if (optionsLoading) return <p className="app-form-loading">Loading your ledger…</p>;
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <label>
         From
         <select
@@ -269,7 +270,7 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
       </label>
 
       {addingNewSource && (
-        <div>
+        <div className="app-form-subpanel">
           <label>
             Type
             <select
@@ -353,31 +354,43 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
               />
             </>
           ) : (
-            <button type="button" onClick={() => setNewSourceExpanded(true)}>
+            <button
+              type="button"
+              className="app-form-secondary-button"
+              onClick={() => setNewSourceExpanded(true)}
+            >
               Add full details (rating, note, date, link)
             </button>
           )}
 
-          <button type="button" onClick={createNewSource} disabled={creatingSource}>
-            {creatingSource ? 'Adding…' : 'Add source'}
-          </button>
-          {ledgerOptions.length > 0 && (
+          <div className="app-form-actions">
             <button
               type="button"
-              onClick={() => {
-                setAddingNewSource(false);
-                resetNewSourceForm();
-              }}
+              className="app-form-submit"
+              onClick={createNewSource}
+              disabled={creatingSource}
             >
-              Cancel
+              {creatingSource ? 'Adding…' : 'Add source'}
             </button>
-          )}
+            {ledgerOptions.length > 0 && (
+              <button
+                type="button"
+                className="app-form-secondary-button"
+                onClick={() => {
+                  setAddingNewSource(false);
+                  resetNewSourceForm();
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {!addingNewSource && (
         <>
-          <div>
+          <div className="app-form-radio-row">
             {CLIP_TYPES.map((type) => (
               <label key={type}>
                 <input
@@ -424,13 +437,13 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
             rows={2}
           />
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" className="app-form-submit" disabled={submitting}>
             {submitting ? 'Adding…' : 'Add to journal'}
           </button>
         </>
       )}
 
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
     </form>
   );
 }

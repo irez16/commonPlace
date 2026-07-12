@@ -1,0 +1,148 @@
+.app-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.app-form h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--text);
+  margin: 0;
+}
+
+.app-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.app-form input[type='text'],
+.app-form input[type='url'],
+.app-form input[type='date'],
+.app-form input[type='email'],
+.app-form input[type='password'],
+.app-form input[type='number'],
+.app-form select,
+.app-form textarea {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.app-form textarea {
+  resize: vertical;
+}
+
+.app-form input[type='file'] {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.app-form-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.app-form-checkbox-row label {
+  display: inline;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.app-form-radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+.app-form-radio-row label {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  text-transform: capitalize;
+  letter-spacing: normal;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.app-form-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 0;
+}
+
+.app-form-loading {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.app-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.app-form-submit {
+  align-self: flex-start;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.app-form-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.app-form-secondary-button {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.app-form-subpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-raised);
+}

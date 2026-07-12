@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES, MEDIA_TYPE_LABELS } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
 import { truncateNote } from '../lib/text';
+import './AppForm.css';
 import './LedgerList.css';
 
 function formatConsumedDate(dateStr: string): string {
@@ -184,7 +185,7 @@ export default function LedgerList({
 
           if (isEditing && editDraft) {
             return (
-              <li key={entry.id}>
+              <li key={entry.id} className="app-form">
                 <select
                   value={editDraft.media_type}
                   onChange={(e) =>
@@ -239,16 +240,19 @@ export default function LedgerList({
                   placeholder="Note"
                   rows={2}
                 />
-                <button
-                  type="button"
-                  onClick={() => saveEdit(entry.id)}
-                  disabled={savingId === entry.id}
-                >
-                  {savingId === entry.id ? 'Saving…' : 'Save'}
-                </button>
-                <button type="button" onClick={cancelEdit}>
-                  Cancel
-                </button>
+                <div className="app-form-actions">
+                  <button
+                    type="button"
+                    className="app-form-submit"
+                    onClick={() => saveEdit(entry.id)}
+                    disabled={savingId === entry.id}
+                  >
+                    {savingId === entry.id ? 'Saving…' : 'Save'}
+                  </button>
+                  <button type="button" className="app-form-secondary-button" onClick={cancelEdit}>
+                    Cancel
+                  </button>
+                </div>
               </li>
             );
           }

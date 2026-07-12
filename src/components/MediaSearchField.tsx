@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { searchBooks, searchPodcasts, searchFilms, getFilmDetails } from '../lib/mediaSearch';
 import type { MediaSearchResult } from '../lib/mediaSearch';
 import type { MediaType } from '../types';
+import './AppForm.css';
+import './MediaSearchField.css';
 
 interface MediaSearchFieldProps {
   mediaType: 'book' | 'podcast' | 'film';
@@ -101,7 +103,7 @@ export default function MediaSearchField({
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="media-search-field">
       <input
         type="text"
         placeholder={placeholder ?? 'Title'}
@@ -113,42 +115,28 @@ export default function MediaSearchField({
           closeTimeoutRef.current = setTimeout(() => setOpen(false), 150);
         }}
       />
-      {searching && <span style={{ fontSize: '0.8em' }}>Searching…</span>}
-      {error && <p style={{ color: 'crimson', fontSize: '0.85em' }}>{error}</p>}
+      {searching && <span className="media-search-status">Searching…</span>}
+      {error && <p className="app-form-error">{error}</p>}
 
       {open && results.length > 0 && (
-        <ul
-          style={{
-            position: 'absolute',
-            zIndex: 10,
-            left: 0,
-            right: 0,
-            listStyle: 'none',
-            margin: 0,
-            padding: 0,
-            border: '1px solid #ccc',
-            background: 'white',
-            maxHeight: 260,
-            overflowY: 'auto',
-          }}
-        >
+        <ul className="media-search-results">
           {results.map((result, i) => (
             <li
               key={result.imdbId ?? `${result.title}-${i}`}
+              className="media-search-result"
               onMouseDown={(e) => {
                 // onMouseDown fires before the input's onBlur, so the click
                 // registers before the dropdown closes.
                 e.preventDefault();
                 handleSelect(result);
               }}
-              style={{ display: 'flex', gap: 8, padding: '6px 8px', cursor: 'pointer' }}
             >
               {result.coverUrl && (
-                <img src={result.coverUrl} alt="" style={{ width: 28, height: 40, objectFit: 'cover' }} />
+                <img className="media-search-result-cover" src={result.coverUrl} alt="" />
               )}
               <div>
-                <div>{result.title}</div>
-                <div style={{ fontSize: '0.8em', color: '#666' }}>
+                <div className="media-search-result-title">{result.title}</div>
+                <div className="media-search-result-meta">
                   {result.creator}
                   {result.creator && result.year ? ' · ' : ''}
                   {result.year}
