@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { getStoredTheme, setStoredTheme, type ThemePreference } from '../lib/theme';
-import { LEDGER_ACCENT_OPTIONS } from '../lib/ledgerAccent';
+import { LEDGER_ACCENT_OPTIONS, resolveLedgerAccent } from '../lib/ledgerAccent';
 import { JOURNAL_COLOR_PRESETS } from '../lib/journalColors';
 import { JOURNAL_FONT_OPTIONS, resolveJournalFont } from '../lib/journalFonts';
 import type { Profile } from '../types';
@@ -182,11 +182,23 @@ export default function SettingsPage() {
       <div className="settings-section">
         <h2>Journal ink color</h2>
         <p className="settings-section-hint">
-          Used for your annotations' left border. In dark mode, annotation text
-          always renders in a readable off-white regardless of this color — this
-          only affects light mode and the card border.
+          Defaults to your Ledger accent above. Pick a color here only if you want your
+          Journal to look different from your Ledger. In dark mode, annotation text always
+          renders in a readable off-white regardless of this color — this only affects
+          light mode and the card border.
         </p>
         <div className="settings-swatch-row">
+          <button
+            type="button"
+            className={`settings-swatch${!profile.journal_cover_color ? ' is-selected' : ''}`}
+            onClick={() => saveField({ journal_cover_color: null })}
+          >
+            <span
+              className="settings-swatch-dot settings-swatch-dot-none"
+              style={{ background: resolveLedgerAccent(profile.ledger_accent) }}
+            />
+            <span className="settings-swatch-label">Match Ledger</span>
+          </button>
           {JOURNAL_COLOR_PRESETS.map((preset) => (
             <button
               key={preset.hex}

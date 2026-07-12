@@ -59,6 +59,7 @@ export default function JournalPage() {
         username={profile.username}
         refreshKey={journalRefreshKey}
         readOnly={!contentEditable}
+        ledgerAccent={profile.ledger_accent}
         journalCoverColor={profile.journal_cover_color}
         journalFont={profile.journal_font}
       />

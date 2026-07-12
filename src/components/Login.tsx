@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import './AppForm.css';
+import './AuthPage.css';
 
 interface LoginProps {
   onComplete?: () => void;
@@ -39,9 +41,9 @@ export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <h2>Log in</h2>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
       <input
         type="email"
         placeholder="Email"
@@ -56,20 +58,19 @@ export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      <button type="submit" disabled={loading}>
+
+      {onForgotPassword && (
+        <button type="button" className="auth-page-forgot-link" onClick={onForgotPassword}>
+          Forgot password?
+        </button>
+      )}
+
+      <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Logging in…' : 'Log in'}
       </button>
 
-      {onForgotPassword && (
-        <p>
-          <button type="button" onClick={onForgotPassword}>
-            Forgot password?
-          </button>
-        </p>
-      )}
-
       {onSwitchToSignUp && (
-        <p>
+        <p className="auth-page-switch">
           Don't have an account?{' '}
           <button type="button" onClick={onSwitchToSignUp}>
             Sign up

@@ -95,6 +95,10 @@
   border: 2px solid transparent;
 }
 
+.settings-swatch-dot-none {
+  box-shadow: 0 0 0 2px var(--bg-raised), 0 0 0 3px var(--text-muted);
+}
+
 .settings-swatch.is-selected .settings-swatch-dot {
   border-color: var(--text);
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import './AppForm.css';
+import './AuthPage.css';
 
 interface ForgotPasswordRequestProps {
   onBackToLogin?: () => void;
@@ -40,14 +42,14 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
 
   if (sent) {
     return (
-      <div>
+      <div className="app-form">
         <h2>Check your email</h2>
-        <p>
+        <p className="auth-page-hint">
           If there's an account for {email}, a password reset link is on its way. It'll
           expire after a while, so use it soon.
         </p>
         {onBackToLogin && (
-          <button type="button" onClick={onBackToLogin}>
+          <button type="button" className="app-form-secondary-button" onClick={onBackToLogin}>
             Back to log in
           </button>
         )}
@@ -56,10 +58,12 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <h2>Reset your password</h2>
-      <p>Enter your email and we'll send you a link to set a new password.</p>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      <p className="auth-page-hint">
+        Enter your email and we'll send you a link to set a new password.
+      </p>
+      {error && <p className="app-form-error">{error}</p>}
       <input
         type="email"
         placeholder="Email"
@@ -67,11 +71,11 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
         onChange={(e) => setEmail(e.target.value)}
         required
       />
-      <button type="submit" disabled={loading}>
+      <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Sending…' : 'Send reset link'}
       </button>
       {onBackToLogin && (
-        <p>
+        <p className="auth-page-switch">
           <button type="button" onClick={onBackToLogin}>
             Back to log in
           </button>

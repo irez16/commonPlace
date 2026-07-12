@@ -23,21 +23,62 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .feed-card {
-  border-left: 5px solid var(--feed-card-accent, var(--accent));
-  padding: 4px 0 4px 16px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.feed-card-byline {
+.feed-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.feed-card-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--feed-card-accent, var(--accent));
+  color: var(--accent-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.feed-card-header-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.feed-card-author-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.feed-card-header-meta {
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 11px;
-  color: var(--feed-card-accent, var(--accent));
-  margin-bottom: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
 }
 
 .feed-card-link-wrapper {
@@ -46,22 +87,10 @@
   text-decoration: none;
 }
 
-.feed-card-meta {
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .feed-card-title {
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 19px;
+  font-size: 20px;
   color: var(--text);
   margin: 0 0 2px;
 }
@@ -76,12 +105,12 @@
 .feed-card-note {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--text);
-  margin: 0 0 8px;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -89,11 +118,15 @@
 .feed-card-footer {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 
 .feed-card-link {
-  font-family: var(--font-sans);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
 }

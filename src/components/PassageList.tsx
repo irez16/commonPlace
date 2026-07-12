@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { resolveJournalFont } from '../lib/journalFonts';
-import type { Passage, LedgerEntry } from '../types';
+import { resolveLedgerAccent } from '../lib/ledgerAccent';
+import type { Passage, LedgerEntry, Profile } from '../types';
 import './PassageList.css';
 
 interface PassageListProps {
@@ -12,10 +13,14 @@ interface PassageListProps {
   username: string;
   refreshKey: number;
   readOnly?: boolean;
-  // Per-user Journal customization (Marginalia). Both are currently
-  // always null for every profile, since there's no Settings UI yet to
-  // set them — these props exist so the rendering side is ready the
-  // moment that UI ships, without another pass through this file.
+  // The app-wide accent picked in Settings — this is the Journal's
+  // default color now, so it stays visually consistent with the
+  // Ledger/profile header rather than tracking its own separate value.
+  ledgerAccent?: Profile['ledger_accent'] | null;
+  // Per-user Journal customization (Marginalia). journalCoverColor, if
+  // set, overrides ledgerAccent for the Journal specifically — an
+  // explicit "make my Journal a different color than my Ledger" choice.
+  // journalFont is unrelated to accent and always applies independently.
   journalCoverColor?: string | null;
   journalFont?: string | null;
 }
@@ -37,6 +42,7 @@ export default function PassageList({
   username,
   refreshKey,
   readOnly = false,
+  ledgerAccent,
   journalCoverColor,
   journalFont,
 }: PassageListProps) {
@@ -135,12 +141,16 @@ export default function PassageList({
   }
 
   // CSS custom properties, not literal color/font values — lets each
-  // card's annotation resolve to the per-user Journal color/font via
-  // var(--passage-accent, var(--marginalia)) in the stylesheet, while
-  // still falling back cleanly to the default Marginalia navy/Caveat
-  // when a profile hasn't customized these (i.e. every profile, today).
-  const cardStyle: CSSProperties & Record<string, string> = {};
-  if (journalCoverColor) cardStyle['--passage-accent'] = journalCoverColor;
+  // card's annotation/border resolve via
+  // var(--passage-accent, var(--marginalia)) in the stylesheet.
+  // Default is the same accent picked in Settings for the Ledger
+  // (ledgerAccent), so the Journal matches the rest of the app by
+  // default. journalCoverColor, if a profile has explicitly set one,
+  // overrides that default — an intentional "different color for my
+  // Journal specifically" choice, not the fallback.
+  const cardStyle: CSSProperties & Record<string, string> = {
+    '--passage-accent': journalCoverColor || resolveLedgerAccent(ledgerAccent),
+  };
   if (journalFont) cardStyle['--passage-font'] = resolveJournalFont(journalFont);
 
   return (

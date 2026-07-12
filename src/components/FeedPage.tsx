@@ -12,6 +12,10 @@ function formatConsumedDate(dateStr: string): string {
   return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
 }
 
+function initials(name: string): string {
+  return name.trim().charAt(0).toUpperCase() || '?';
+}
+
 export default function FeedPage() {
   const { loading, needsAuth, error, entries, viewerId } = useFeed();
 
@@ -40,41 +44,37 @@ export default function FeedPage() {
       ) : (
         <ul className="feed-list">
           {entries.map((entry) => {
-            // Each card reflects its author's chosen Ledger accent, not
-            // the viewer's — same rule as viewing their profile directly.
+            // Each post's avatar and byline reflect its author's chosen
+            // Ledger accent — not the viewer's — same rule used
+            // everywhere else in the app.
             const cardStyle: CSSProperties & Record<string, string> = {
               '--feed-card-accent': resolveLedgerAccent(entry.author.ledger_accent),
             };
 
             return (
               <li key={entry.id} className="feed-card" style={cardStyle}>
-                <div className="feed-card-byline">
-                  <Link to={`/@${entry.author.username}`}>{entry.author.name}</Link>
-                </div>
+                <Link className="feed-card-header" to={`/@${entry.author.username}`}>
+                  <span className="feed-card-avatar">{initials(entry.author.name)}</span>
+                  <span className="feed-card-header-text">
+                    <span className="feed-card-author-name">{entry.author.name}</span>
+                    <span className="feed-card-header-meta">
+                      {MEDIA_TYPE_LABELS[entry.media_type]} · {formatConsumedDate(entry.consumed_date)}
+                      {entry.rating ? ` · ${entry.rating}/5` : ''}
+                    </span>
+                  </span>
+                </Link>
 
                 <Link
                   className="feed-card-link-wrapper"
                   to={`/@${entry.author.username}/ledger/${entry.id}`}
                 >
-                  <div className="feed-card-meta">
-                    <span>{MEDIA_TYPE_LABELS[entry.media_type]}</span>
-                    <span>·</span>
-                    <span>{formatConsumedDate(entry.consumed_date)}</span>
-                    {entry.rating && (
-                      <>
-                        <span>·</span>
-                        <span>{entry.rating}/5</span>
-                      </>
-                    )}
-                  </div>
-
                   <h3 className="feed-card-title">{entry.title}</h3>
                   {entry.creator && <div className="feed-card-creator">{entry.creator}</div>}
-
                   {entry.note && <p className="feed-card-note">{truncateNote(entry.note)}</p>}
                 </Link>
 
                 <div className="feed-card-footer">
+                  {viewerId && <SaveToListButton viewerId={viewerId} entry={entry} />}
                   {entry.url && (
                     <a
                       className="feed-card-link"
@@ -85,7 +85,6 @@ export default function FeedPage() {
                       View source
                     </a>
                   )}
-                  {viewerId && <SaveToListButton viewerId={viewerId} entry={entry} />}
                 </div>
               </li>
             );

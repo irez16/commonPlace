@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import './AppForm.css';
+import './AuthPage.css';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
 
@@ -111,9 +113,9 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
 
   if (step === 'account') {
     return (
-      <form onSubmit={handleAccountSubmit}>
+      <form className="app-form" onSubmit={handleAccountSubmit}>
         <h2>Create your account</h2>
-        {error && <p style={{ color: 'crimson' }}>{error}</p>}
+        {error && <p className="app-form-error">{error}</p>}
         <input
           type="email"
           placeholder="Email"
@@ -129,7 +131,7 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
           minLength={6}
           required
         />
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="app-form-submit" disabled={loading}>
           {loading ? 'Creating account…' : 'Continue'}
         </button>
       </form>
@@ -137,9 +139,9 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
   }
 
   return (
-    <form onSubmit={handleProfileSubmit}>
+    <form className="app-form" onSubmit={handleProfileSubmit}>
       <h2>Set up your profile</h2>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="app-form-error">{error}</p>}
       <input
         type="text"
         placeholder="Username"
@@ -154,7 +156,7 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
         onChange={(e) => setName(e.target.value)}
         required
       />
-      <button type="submit" disabled={loading}>
+      <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Saving…' : 'Finish'}
       </button>
     </form>

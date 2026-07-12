@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-left: 7px solid var(--ledger-accent, var(--accent));
+  border-left: 6px solid var(--ledger-accent, var(--accent));
   padding-left: 16px;
 }
 

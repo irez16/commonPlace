@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import './AppForm.css';
+import './AuthPage.css';
 
 // This is where the link in the reset-password email points. Supabase's
 // client automatically reads the recovery token out of the URL and
@@ -68,53 +70,70 @@ export default function ResetPasswordPage() {
     setDone(true);
   };
 
-  if (status === 'checking') return <p>Checking your reset link…</p>;
+  if (status === 'checking') {
+    return (
+      <div className="auth-page">
+        <p className="auth-page-hint">Checking your reset link…</p>
+      </div>
+    );
+  }
 
   if (status === 'invalid') {
     return (
-      <div>
-        <h2>This link isn't valid</h2>
-        <p>It may have expired, or already been used. Request a new one from the login screen.</p>
-        <button type="button" onClick={() => navigate('/')}>
-          Back to log in
-        </button>
+      <div className="auth-page">
+        <div className="app-form">
+          <h2>This link isn't valid</h2>
+          <p className="auth-page-hint">
+            It may have expired, or already been used. Request a new one from the login
+            screen.
+          </p>
+          <button type="button" className="app-form-submit" onClick={() => navigate('/')}>
+            Back to log in
+          </button>
+        </div>
       </div>
     );
   }
 
   if (done) {
     return (
-      <div>
-        <h2>Password updated</h2>
-        <p>You're all set — head back and log in with your new password.</p>
-        <button type="button" onClick={() => navigate('/')}>
-          Continue
-        </button>
+      <div className="auth-page">
+        <div className="app-form">
+          <h2>Password updated</h2>
+          <p className="auth-page-hint">
+            You're all set — head back and log in with your new password.
+          </p>
+          <button type="button" className="app-form-submit" onClick={() => navigate('/')}>
+            Continue
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Set a new password</h2>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      <input
-        type="password"
-        placeholder="New password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Confirm new password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-      />
-      <button type="submit" disabled={saving}>
-        {saving ? 'Saving…' : 'Set password'}
-      </button>
-    </form>
+    <div className="auth-page">
+      <form className="app-form" onSubmit={handleSubmit}>
+        <h2>Set a new password</h2>
+        {error && <p className="app-form-error">{error}</p>}
+        <input
+          type="password"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        <button type="submit" className="app-form-submit" disabled={saving}>
+          {saving ? 'Saving…' : 'Set password'}
+        </button>
+      </form>
+    </div>
   );
 }

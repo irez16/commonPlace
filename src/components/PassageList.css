@@ -9,7 +9,7 @@
 
 .passage-card {
   background: var(--bg-raised);
-  border-left: 3px solid var(--passage-accent, var(--marginalia));
+  border-left: 4px solid var(--passage-accent, var(--marginalia));
   border-radius: 0 8px 8px 0;
   padding: 14px 16px;
 }
