@@ -66,6 +66,11 @@ export default function SettingsPage() {
     setStoredTheme(next);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
   return (
     <div className="settings-page">
       <Link className="settings-page-breadcrumb" to={`/@${username}`}>
@@ -163,6 +168,12 @@ export default function SettingsPage() {
         {status === 'saving' && <span className="settings-save-status">Saving…</span>}
         {status === 'saved' && <span className="settings-save-status">Saved.</span>}
         {status === 'error' && <span className="settings-error">{errorMessage}</span>}
+      </div>
+
+      <div className="settings-section">
+        <button type="button" className="settings-logout-button" onClick={handleLogout}>
+          Log out
+        </button>
       </div>
     </div>
   );

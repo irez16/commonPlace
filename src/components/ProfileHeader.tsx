@@ -33,11 +33,6 @@ export default function ProfileHeader({
     isOwnProfile ? profile.id : undefined
   );
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
   const startEdit = () => {
     setDraft({
       name: profile.name,
@@ -167,9 +162,6 @@ export default function ProfileHeader({
           <div className="profile-header-actions">
             <button type="button" className="profile-header-button" onClick={startEdit}>
               Edit profile
-            </button>
-            <button type="button" className="profile-header-button" onClick={handleLogout}>
-              Log out
             </button>
           </div>
         </>

@@ -30,8 +30,8 @@
 }
 
 .ledger-card {
-  border-left: 3px solid var(--ledger-accent, var(--accent));
-  padding: 4px 0 4px 14px;
+  border-left: 5px solid var(--ledger-accent, var(--accent));
+  padding: 4px 0 4px 16px;
 }
 
 .ledger-card-link-wrapper {

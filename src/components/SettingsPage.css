@@ -125,3 +125,21 @@
   font-size: 13px;
   color: var(--accent);
 }
+
+.settings-logout-button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.settings-logout-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
