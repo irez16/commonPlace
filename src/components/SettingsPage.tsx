@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ChangeEvent, CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useProfileStatus } from '../hooks/useProfileStatus';
@@ -8,7 +8,9 @@ import { getStoredTheme, setStoredTheme, type ThemePreference } from '../lib/the
 import { LEDGER_ACCENT_OPTIONS, resolveLedgerAccent } from '../lib/ledgerAccent';
 import { JOURNAL_COLOR_PRESETS } from '../lib/journalColors';
 import { JOURNAL_FONT_OPTIONS, resolveJournalFont } from '../lib/journalFonts';
+import Avatar from './Avatar';
 import type { Profile } from '../types';
+import './AppForm.css';
 import './SettingsPage.css';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -24,6 +26,9 @@ export default function SettingsPage() {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>('system');
+
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -75,6 +80,49 @@ export default function SettingsPage() {
     // as the UI snapping back rather than looking like it saved.
     setProfile(data as Profile);
     setStatus('saved');
+  };
+
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Please choose an image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError('Image must be under 5MB.');
+      return;
+    }
+
+    setAvatarError(null);
+    setAvatarUploading(true);
+
+    // Fixed filename per user (not per upload) with upsert, so re-
+    // uploading replaces the old file rather than accumulating orphans
+    // in storage.
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const path = `${profile.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, cacheControl: '3600' });
+
+    if (uploadError) {
+      setAvatarUploading(false);
+      setAvatarError(uploadError.message);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+    // Cache-bust: the path is stable (upsert overwrites it), so without
+    // this the browser/CDN can keep showing the old cached image at
+    // the same URL right after a re-upload.
+    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    await saveField({ avatar_url: avatarUrl });
+    setAvatarUploading(false);
   };
 
   const setThemePreference = (next: ThemePreference) => {
@@ -150,6 +198,29 @@ export default function SettingsPage() {
       <h1>Settings</h1>
 
       <div className="settings-section">
+        <h2>Avatar</h2>
+        <div className="settings-avatar-row">
+          <Avatar
+            name={profile.name}
+            url={profile.avatar_url}
+            accentColor={resolveLedgerAccent(profile.ledger_accent)}
+            size={64}
+          />
+          <label className="app-form-secondary-button settings-avatar-upload-label">
+            {avatarUploading ? 'Uploading…' : 'Upload photo'}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              disabled={avatarUploading}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
+        {avatarError && <p className="app-form-error">{avatarError}</p>}
+      </div>
+
+      <div className="settings-section">
         <h2>Appearance</h2>
         <p className="settings-section-hint">
           Saved on this device only — won't follow you to another device or browser.
@@ -179,6 +250,7 @@ export default function SettingsPage() {
               key={key}
               type="button"
               className={`settings-swatch${profile.ledger_accent === key ? ' is-selected' : ''}`}
+              style={{ '--swatch-ring-color': opt.cssVar } as CSSProperties & Record<string, string>}
               onClick={() => saveField({ ledger_accent: key as Profile['ledger_accent'] })}
             >
               <span className="settings-swatch-dot" style={{ background: opt.cssVar }} />
@@ -200,6 +272,11 @@ export default function SettingsPage() {
           <button
             type="button"
             className={`settings-swatch${!profile.journal_cover_color ? ' is-selected' : ''}`}
+            style={
+              {
+                '--swatch-ring-color': resolveLedgerAccent(profile.ledger_accent),
+              } as CSSProperties & Record<string, string>
+            }
             onClick={() => saveField({ journal_cover_color: null })}
           >
             <span
@@ -213,6 +290,7 @@ export default function SettingsPage() {
               key={preset.hex}
               type="button"
               className={`settings-swatch${profile.journal_cover_color === preset.hex ? ' is-selected' : ''}`}
+              style={{ '--swatch-ring-color': preset.hex } as CSSProperties & Record<string, string>}
               onClick={() => saveField({ journal_cover_color: preset.hex })}
             >
               <span className="settings-swatch-dot" style={{ background: preset.hex }} />

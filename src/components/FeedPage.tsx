@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useFeed } from '../hooks/useFeed';
 import SaveToListButton from './SaveToListButton';
+import Avatar from './Avatar';
 import { MEDIA_TYPE_LABELS } from '../types';
 import { truncateNote } from '../lib/text';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
@@ -10,10 +10,6 @@ import './FeedPage.css';
 function formatConsumedDate(dateStr: string): string {
   const date = new Date(`${dateStr}T12:00:00`);
   return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
-}
-
-function initials(name: string): string {
-  return name.trim().charAt(0).toUpperCase() || '?';
 }
 
 export default function FeedPage() {
@@ -44,17 +40,19 @@ export default function FeedPage() {
       ) : (
         <ul className="feed-list">
           {entries.map((entry) => {
-            // Each post's avatar and byline reflect its author's chosen
+            // Each post's avatar reflects its author's own chosen
             // Ledger accent — not the viewer's — same rule used
             // everywhere else in the app.
-            const cardStyle: CSSProperties & Record<string, string> = {
-              '--feed-card-accent': resolveLedgerAccent(entry.author.ledger_accent),
-            };
+            const authorAccent = resolveLedgerAccent(entry.author.ledger_accent);
 
             return (
-              <li key={entry.id} className="feed-card" style={cardStyle}>
+              <li key={entry.id} className="feed-card">
                 <Link className="feed-card-header" to={`/@${entry.author.username}`}>
-                  <span className="feed-card-avatar">{initials(entry.author.name)}</span>
+                  <Avatar
+                    name={entry.author.name}
+                    url={entry.author.avatar_url}
+                    accentColor={authorAccent}
+                  />
                   <span className="feed-card-header-text">
                     <span className="feed-card-author-name">{entry.author.name}</span>
                     <span className="feed-card-header-meta">

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useFollowCounts } from '../hooks/useFollowCounts';
+import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import FollowButton from './FollowButton';
+import Avatar from './Avatar';
 import type { Profile } from '../types';
 import './ProfileHeader.css';
 
@@ -139,20 +141,27 @@ export default function ProfileHeader({
 
   return (
     <div className="profile-header">
-      <h1 className="profile-header-name">{profile.name}</h1>
-      <p className="profile-header-username">@{profile.username}</p>
-      {profile.currently && (
-        <p className="profile-header-currently">
-          <span className="profile-header-currently-label">Currently</span>
-          {profile.currently}
-        </p>
-      )}
-      {profile.bio && <p className="profile-header-bio">{profile.bio}</p>}
-      {isOwnProfile ? (
-        <>
-          <div className="profile-header-counts">
-            <Link to="/following">
-              Following{!countsLoading && ` (${followingCount})`}
+      <Avatar
+        name={profile.name}
+        url={profile.avatar_url}
+        accentColor={resolveLedgerAccent(profile.ledger_accent)}
+        size={56}
+      />
+      <div className="profile-header-text">
+        <h1 className="profile-header-name">{profile.name}</h1>
+        <p className="profile-header-username">@{profile.username}</p>
+        {profile.currently && (
+          <p className="profile-header-currently">
+            <span className="profile-header-currently-label">Currently</span>
+            {profile.currently}
+          </p>
+        )}
+        {profile.bio && <p className="profile-header-bio">{profile.bio}</p>}
+        {isOwnProfile ? (
+          <>
+            <div className="profile-header-counts">
+              <Link to="/following">
+                Following{!countsLoading && ` (${followingCount})`}
             </Link>
             <span>·</span>
             <Link to="/followers">
@@ -170,6 +179,7 @@ export default function ProfileHeader({
           <FollowButton viewerId={viewerId} targetUserId={profile.id} />
         </div>
       )}
+      </div>
     </div>
   );
 }

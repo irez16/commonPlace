@@ -37,6 +37,17 @@
   gap: 14px;
 }
 
+.settings-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settings-avatar-upload-label {
+  display: inline-flex;
+  align-items: center;
+}
+
 .settings-toggle-row {
   display: flex;
   gap: 8px;
@@ -100,11 +111,11 @@
 }
 
 .settings-swatch.is-selected .settings-swatch-dot {
-  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--swatch-ring-color, var(--accent));
 }
 
 .settings-swatch.is-selected .settings-swatch-dot-none {
-  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--swatch-ring-color, var(--accent));
 }
 
 .settings-swatch-label {

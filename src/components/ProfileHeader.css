@@ -1,9 +1,17 @@
 .profile-header {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
   border-left: 6px solid var(--ledger-accent, var(--accent));
   padding-left: 16px;
+}
+
+.profile-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 .profile-header-name {
