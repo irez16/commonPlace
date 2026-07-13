@@ -100,7 +100,11 @@
 }
 
 .settings-swatch.is-selected .settings-swatch-dot {
-  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
+}
+
+.settings-swatch.is-selected .settings-swatch-dot-none {
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
 }
 
 .settings-swatch-label {

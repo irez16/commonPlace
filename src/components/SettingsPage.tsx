@@ -51,13 +51,17 @@ export default function SettingsPage() {
 
   const saveField = async (patch: Partial<Profile>) => {
     // Optimistic — the UI reflects the choice immediately rather than
-    // waiting on the network round-trip, since these are simple enum/
-    // color values with little room for the save to meaningfully fail.
+    // waiting on the network round-trip.
     setProfile((p) => (p ? { ...p, ...patch } : p));
     setStatus('saving');
     setErrorMessage(null);
 
-    const { error } = await supabase.from('profiles').update(patch).eq('id', profile.id);
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(patch)
+      .eq('id', profile.id)
+      .select()
+      .single();
 
     if (error) {
       setStatus('error');
@@ -65,6 +69,11 @@ export default function SettingsPage() {
       return;
     }
 
+    // Trust what the server actually stored, not just the optimistic
+    // guess — if something (a constraint, a stale RLS rule, whatever)
+    // silently rejected part of the write, this is where it'd show up
+    // as the UI snapping back rather than looking like it saved.
+    setProfile(data as Profile);
     setStatus('saved');
   };
 
