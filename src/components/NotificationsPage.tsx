@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
 import { useProfileStatus } from '../hooks/useProfileStatus';
+import Avatar from './Avatar';
+import { resolveLedgerAccent } from '../lib/ledgerAccent';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './NotificationsPage.css';
 
 export default function NotificationsPage() {
+  useDocumentTitle('In Common');
   const { loading, needsAuth, error, notifications, markAsRead } = useNotifications();
   const { username } = useProfileStatus();
 
@@ -39,36 +43,46 @@ export default function NotificationsPage() {
             >
               {!n.is_read && <span className="notification-unread-dot" aria-label="Unread" />}
 
-              <p className="notification-line">
-                {n.otherUser ? (
-                  <Link to={`/@${n.otherUser.username}`} onClick={(e) => e.stopPropagation()}>
-                    {n.otherUser.name}
-                  </Link>
-                ) : (
-                  'Someone you follow'
-                )}{' '}
-                also clipped this
-                {n.entryTitle && (
-                  <>
-                    {' '}
-                    from{' '}
-                    {username && n.entryId ? (
-                      <Link
-                        to={`/@${username}/ledger/${n.entryId}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <strong>{n.entryTitle}</strong>
+              <div className="notification-card-body">
+                <Avatar
+                  name={n.otherUser?.name ?? '?'}
+                  url={n.otherUser?.avatar_url}
+                  accentColor={resolveLedgerAccent(n.otherUser?.ledger_accent)}
+                  size={34}
+                />
+                <div>
+                  <p className="notification-line">
+                    {n.otherUser ? (
+                      <Link to={`/@${n.otherUser.username}`} onClick={(e) => e.stopPropagation()}>
+                        {n.otherUser.name}
                       </Link>
                     ) : (
-                      <strong>{n.entryTitle}</strong>
+                      'Someone you follow'
+                    )}{' '}
+                    also clipped this
+                    {n.entryTitle && (
+                      <>
+                        {' '}
+                        from{' '}
+                        {username && n.entryId ? (
+                          <Link
+                            to={`/@${username}/ledger/${n.entryId}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <strong>{n.entryTitle}</strong>
+                          </Link>
+                        ) : (
+                          <strong>{n.entryTitle}</strong>
+                        )}
+                        {n.entryCreator ? ` — ${n.entryCreator}` : ''}
+                      </>
                     )}
-                    {n.entryCreator ? ` — ${n.entryCreator}` : ''}
-                  </>
-                )}
-                :
-              </p>
+                    :
+                  </p>
 
-              {n.clippedText && <p className="notification-quote">{n.clippedText}</p>}
+                  {n.clippedText && <p className="notification-quote">{n.clippedText}</p>}
+                </div>
+              </div>
             </li>
           ))}
         </ul>

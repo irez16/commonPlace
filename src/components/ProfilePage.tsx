@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePublicProfile } from '../hooks/usePublicProfile';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import ProfileHeader from './ProfileHeader';
 import AddLedgerEntry from './AddLedgerEntry';
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const username = handle?.startsWith('@') ? handle.slice(1) : undefined;
   const { loading, notFound, error, profile, isOwnProfile, viewerId } = usePublicProfile(username);
   const [liveProfile, setLiveProfile] = useState<Profile | null>(null);
+  useDocumentTitle(profile?.name);
 
   // Governs both the Ledger and Want to Consume sections at once — owner
   // only, and always resets to false on a fresh page load, so your own

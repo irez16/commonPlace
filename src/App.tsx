@@ -8,6 +8,7 @@ import FollowingPage from './components/FollowingPage';
 import FollowersPage from './components/FollowersPage';
 import FeedPage from './components/FeedPage';
 import JournalPage from './components/JournalPage';
+import PassageDetailPage from './components/PassageDetailPage';
 import NotificationsPage from './components/NotificationsPage';
 import SettingsPage from './components/SettingsPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/:handle/journal" element={<JournalPage />} />
+        <Route path="/:handle/journal/:passageId" element={<PassageDetailPage />} />
         <Route path="/:handle/ledger/:entryId" element={<LedgerEntryDetailPage />} />
         <Route path="/:handle" element={<ProfilePage />} />
       </Routes>

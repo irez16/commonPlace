@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { usePublicProfile } from '../hooks/usePublicProfile';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import type { LedgerEntry } from '../types';
 import { MEDIA_TYPE_LABELS } from '../types';
@@ -25,6 +26,7 @@ export default function LedgerEntryDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useDocumentTitle(entry?.title);
 
   const fetchEntry = useCallback(async () => {
     if (!entryId) return;

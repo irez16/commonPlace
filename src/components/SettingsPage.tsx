@@ -3,6 +3,7 @@ import type { FormEvent, ChangeEvent, CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useProfileStatus } from '../hooks/useProfileStatus';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { getStoredTheme, setStoredTheme, type ThemePreference } from '../lib/theme';
 import { LEDGER_ACCENT_OPTIONS, resolveLedgerAccent } from '../lib/ledgerAccent';
@@ -19,6 +20,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 // button — since these are all single-value toggles/pickers rather than
 // free-text fields where you'd want a chance to review before committing.
 export default function SettingsPage() {
+  useDocumentTitle('Settings');
   const { username } = useProfileStatus();
   const { loading, profile: fetchedProfile } = usePublicProfile(username);
 

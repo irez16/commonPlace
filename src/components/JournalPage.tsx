@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePublicProfile } from '../hooks/usePublicProfile';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import AddPassage from './AddPassage';
 import PassageList from './PassageList';
 import './JournalPage.css';
@@ -9,6 +10,7 @@ export default function JournalPage() {
   const { handle } = useParams<{ handle: string }>();
   const username = handle?.startsWith('@') ? handle.slice(1) : undefined;
   const { loading, notFound, error, profile, isOwnProfile } = usePublicProfile(username);
+  useDocumentTitle(profile ? `${profile.name}'s Journal` : 'Journal');
 
   // Same pattern as the profile page: governs add/delete controls, owner
   // only, always resets to view on a fresh load.

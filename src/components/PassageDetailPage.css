@@ -1,0 +1,19 @@
+.passage-detail-page {
+  padding: 20px 20px 60px;
+}
+
+.passage-detail-breadcrumb {
+  display: block;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.passage-detail-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}

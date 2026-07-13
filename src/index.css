@@ -60,8 +60,10 @@ body {
   background: var(--bg);
   /* Clears the fixed TabBar. Applied globally rather than only on pages
      that show the bar (login/signup don't) — the extra space there is
-     harmless, and conditional padding isn't worth the added complexity. */
-  padding-bottom: 76px;
+     harmless, and conditional padding isn't worth the added complexity.
+     Includes the safe-area inset since the bar itself grows by that
+     amount on notched devices (see TabBar.css). */
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
 }
 
 /* --- Headings & titles: Fraunces --- */

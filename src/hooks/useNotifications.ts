@@ -1,9 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import type { InCommonNotification } from '../types';
+import type { InCommonNotification, Profile } from '../types';
 
 export interface NotificationItem extends InCommonNotification {
-  otherUser: { username: string; name: string } | null;
+  otherUser: {
+    username: string;
+    name: string;
+    avatar_url: string | null;
+    ledger_accent: Profile['ledger_accent'];
+  } | null;
   clippedText: string | null;
   entryId: string | null;
   entryTitle: string | null;
@@ -64,7 +69,7 @@ export function useNotifications(): NotificationsState {
 
     const [{ data: profileRows, error: profileError }, { data: passageRows, error: passageError }] =
       await Promise.all([
-        supabase.from('public_profiles').select('id, username, name').in('id', otherUserIds),
+        supabase.from('public_profiles').select('id, username, name, avatar_url, ledger_accent').in('id', otherUserIds),
         supabase.from('passages').select('id, clipped_text, ledger_entry_id').in('id', myPassageIds),
       ]);
 
@@ -75,7 +80,16 @@ export function useNotifications(): NotificationsState {
     }
 
     const profileById = new Map(
-      (profileRows ?? []).map((p) => [p.id as string, p as { id: string; username: string; name: string }])
+      (profileRows ?? []).map((p) => [
+        p.id as string,
+        p as {
+          id: string;
+          username: string;
+          name: string;
+          avatar_url: string | null;
+          ledger_accent: Profile['ledger_accent'];
+        },
+      ])
     );
     const passageById = new Map(
       (passageRows ?? []).map((p) => [
@@ -111,7 +125,14 @@ export function useNotifications(): NotificationsState {
 
       return {
         ...n,
-        otherUser: otherProfile ? { username: otherProfile.username, name: otherProfile.name } : null,
+        otherUser: otherProfile
+          ? {
+              username: otherProfile.username,
+              name: otherProfile.name,
+              avatar_url: otherProfile.avatar_url,
+              ledger_accent: otherProfile.ledger_accent,
+            }
+          : null,
         clippedText: myPassage?.clipped_text ?? null,
         entryId: entry?.id ?? null,
         entryTitle: entry?.title ?? null,

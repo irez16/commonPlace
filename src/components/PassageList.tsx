@@ -160,16 +160,26 @@ export default function PassageList({
 
         return (
           <li key={passage.id} className="passage-card" style={cardStyle}>
-            <div className="passage-card-type">{CLIP_TYPE_LABELS[passage.clip_type]}</div>
+            <Link
+              className="passage-card-link-wrapper"
+              to={`/@${username}/journal/${passage.id}`}
+            >
+              <div className="passage-card-type">{CLIP_TYPE_LABELS[passage.clip_type]}</div>
 
-            {passage.clip_type === 'text' && (
-              <p className="passage-card-quote">{passage.clipped_text}</p>
-            )}
-            {passage.clip_type === 'image' && passage.media_path && (
-              <div className="passage-card-media">
-                <img src={mediaUrl(passage.media_path)} alt="" />
-              </div>
-            )}
+              {passage.clip_type === 'text' && (
+                <p className="passage-card-quote">{passage.clipped_text}</p>
+              )}
+              {passage.clip_type === 'image' && passage.media_path && (
+                <div className="passage-card-media">
+                  <img src={mediaUrl(passage.media_path)} alt="" />
+                </div>
+              )}
+            </Link>
+
+            {/* video/audio have their own native interactive controls,
+                which shouldn't nest inside an <a> (the Link above) —
+                invalid HTML, and browsers handle clicks on those
+                controls inconsistently when wrapped that way. */}
             {passage.clip_type === 'video' && passage.media_path && (
               <div className="passage-card-media">
                 <video controls src={mediaUrl(passage.media_path)} />
@@ -181,15 +191,23 @@ export default function PassageList({
               </div>
             )}
 
-            {passage.annotation && (
-              <p className="passage-card-annotation">{passage.annotation}</p>
-            )}
+            <Link
+              className="passage-card-link-wrapper"
+              to={`/@${username}/journal/${passage.id}`}
+            >
+              {passage.annotation && (
+                <p className="passage-card-annotation">{passage.annotation}</p>
+              )}
+            </Link>
 
             <div className="passage-card-source">
               {entry && (
                 <span>
                   From{' '}
-                  <Link to={`/@${username}/ledger/${passage.ledger_entry_id}`}>
+                  <Link
+                    to={`/@${username}/ledger/${passage.ledger_entry_id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {entry.title}
                     {entry.creator ? ` — ${entry.creator}` : ''}
                   </Link>

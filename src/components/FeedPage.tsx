@@ -5,6 +5,7 @@ import Avatar from './Avatar';
 import { MEDIA_TYPE_LABELS } from '../types';
 import { truncateNote } from '../lib/text';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './FeedPage.css';
 
 function formatConsumedDate(dateStr: string): string {
@@ -13,6 +14,7 @@ function formatConsumedDate(dateStr: string): string {
 }
 
 export default function FeedPage() {
+  useDocumentTitle('Feed');
   const { loading, needsAuth, error, entries, viewerId } = useFeed();
 
   if (needsAuth) {
