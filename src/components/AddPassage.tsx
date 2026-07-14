@@ -262,7 +262,7 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
           {ledgerOptions.map((opt) => (
             <option key={opt.id} value={opt.id}>
               {opt.title}
-              {opt.creator ? ` — ${opt.creator}` : ''}
+              {opt.creator ? ` · ${opt.creator}` : ''}
             </option>
           ))}
           <option value={NEW_SOURCE_VALUE}>+ Add new source</option>
@@ -299,7 +299,7 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
               value={newTitle}
               onChange={setNewTitle}
               onSelect={handleNewSourceAutofill}
-              placeholder="Title — start typing to search"
+              placeholder="Start typing a title..."
             />
           ) : (
             <input
@@ -338,7 +338,7 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
               <label>
                 Rating (optional)
                 <select value={newRating} onChange={(e) => setNewRating(e.target.value)}>
-                  <option value="">—</option>
+                  <option value="">No rating</option>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
                       {n}

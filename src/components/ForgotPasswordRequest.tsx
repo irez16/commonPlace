@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import Captcha, { type CaptchaHandle } from './Captcha';
 import './AppForm.css';
 import './AuthPage.css';
 
@@ -16,6 +17,8 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,14 +27,17 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
+      captchaToken: captchaToken ?? undefined,
     });
 
+    captchaRef.current?.reset();
     setLoading(false);
 
     // Deliberately not distinguishing "no account with that email" from
     // success — confirming which emails have accounts is an information
     // leak. Supabase's client already doesn't error on unknown emails
-    // for this call, so this mostly covers network/rate-limit failures.
+    // for this call, so this mostly covers network/rate-limit/captcha
+    // failures.
     if (resetError) {
       setError(resetError.message);
       return;
@@ -71,6 +77,9 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
         onChange={(e) => setEmail(e.target.value)}
         required
       />
+
+      <Captcha ref={captchaRef} onToken={setCaptchaToken} />
+
       <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Sending…' : 'Send reset link'}
       </button>

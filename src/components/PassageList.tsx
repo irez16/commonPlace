@@ -209,7 +209,7 @@ export default function PassageList({
                     onClick={(e) => e.stopPropagation()}
                   >
                     {entry.title}
-                    {entry.creator ? ` — ${entry.creator}` : ''}
+                    {entry.creator ? ` by ${entry.creator}` : ''}
                   </Link>
                 </span>
               )}

@@ -30,7 +30,7 @@ export default function NotificationsPage() {
 
       {notifications.length === 0 ? (
         <p className="notifications-status">
-          Nothing here yet — you'll hear about it when someone you follow clips a passage
+          Nothing here yet. You'll hear about it when someone you follow clips a passage
           you've already saved.
         </p>
       ) : (
@@ -74,7 +74,7 @@ export default function NotificationsPage() {
                         ) : (
                           <strong>{n.entryTitle}</strong>
                         )}
-                        {n.entryCreator ? ` — ${n.entryCreator}` : ''}
+                        {n.entryCreator ? ` by ${n.entryCreator}` : ''}
                       </>
                     )}
                     :

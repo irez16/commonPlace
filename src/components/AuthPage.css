@@ -64,3 +64,14 @@
   cursor: pointer;
   margin-top: -4px;
 }
+
+.auth-page-legal-hint {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: -6px 0 0;
+}
+
+.auth-page-legal-hint a {
+  color: var(--accent);
+}

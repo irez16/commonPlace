@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import Captcha, { type CaptchaHandle } from './Captcha';
 import './AppForm.css';
 import './AuthPage.css';
 
@@ -21,6 +23,8 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   const handleAccountSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,8 +34,10 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: captchaToken ? { captchaToken } : undefined,
     });
 
+    captchaRef.current?.reset();
     setLoading(false);
 
     if (signUpError) {
@@ -70,7 +76,7 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
 
     if (!user) {
       setLoading(false);
-      setError('Session expired — please log in again.');
+      setError('Session expired, please log in again.');
       return;
     }
 
@@ -87,7 +93,7 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
     }
     if (existing) {
       setLoading(false);
-      setError('That username is taken — try another.');
+      setError('That username is taken, try another.');
       return;
     }
 
@@ -101,7 +107,7 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
 
     if (insertError) {
       if (insertError.code === '23505') {
-        setError('That username was just taken — try another.');
+        setError('That username was just taken, try another.');
       } else {
         setError(insertError.message);
       }
@@ -131,9 +137,24 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
           minLength={6}
           required
         />
+
+        <Captcha ref={captchaRef} onToken={setCaptchaToken} />
+
         <button type="submit" className="app-form-submit" disabled={loading}>
           {loading ? 'Creating account…' : 'Continue'}
         </button>
+
+        <p className="auth-page-legal-hint">
+          By creating an account, you agree to the{' '}
+          <Link to="/legal#terms" target="_blank" rel="noreferrer">
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link to="/legal#privacy" target="_blank" rel="noreferrer">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </form>
     );
   }

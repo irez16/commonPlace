@@ -143,7 +143,7 @@ export default function PassageDetailPage() {
               From{' '}
               <Link to={`/@${username}/ledger/${passage.ledger_entry_id}`}>
                 {entry.title}
-                {entry.creator ? ` — ${entry.creator}` : ''}
+                {entry.creator ? ` by ${entry.creator}` : ''}
               </Link>
             </span>
           )}

@@ -166,7 +166,7 @@ export default function WantToConsumeList({
           if (isPromoting) {
             return (
               <li key={item.id} className="wtc-promote-form">
-                <p className="wtc-row-title">{item.title} — how was it?</p>
+                <p className="wtc-row-title">How was {item.title}?</p>
                 <label>
                   Date finished
                   <input
@@ -185,7 +185,7 @@ export default function WantToConsumeList({
                       setPromoteDraft((d) => ({ ...d, rating: e.target.value }))
                     }
                   >
-                    <option value="">—</option>
+                    <option value="">No rating</option>
                     {[1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n}>
                         {n}
@@ -222,7 +222,7 @@ export default function WantToConsumeList({
               <div className="wtc-row-main">
                 <div className="wtc-row-title">
                   {item.title}
-                  {item.creator && ` — ${item.creator}`}
+                  {item.creator && ` by ${item.creator}`}
                 </div>
                 <div className="wtc-row-meta">
                   {item.media_type}

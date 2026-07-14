@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import * as Sentry from '@sentry/react';
 import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
@@ -26,10 +27,11 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // No error-reporting service wired up (e.g. Sentry) — this is the
-    // only record of the crash right now, visible in the browser
-    // console rather than sent anywhere.
+    // console.error is the only record if Sentry isn't configured
+    // (VITE_SENTRY_DSN unset — Sentry.captureException becomes a
+    // harmless no-op in that case, not an error itself).
     console.error('Uncaught error:', error, info.componentStack);
+    Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
   }
 
   render() {
@@ -38,7 +40,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <div className="error-boundary">
           <h1>Something went wrong</h1>
           <p>
-            The page hit an unexpected error. Reloading usually fixes it — if it keeps
+            The page hit an unexpected error. Try reloading, and if it keeps
             happening, that's worth reporting.
           </p>
           <button

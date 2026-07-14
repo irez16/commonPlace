@@ -227,7 +227,7 @@ export default function LedgerList({
                   value={editDraft.rating}
                   onChange={(e) => setEditDraft((d) => d && { ...d, rating: e.target.value })}
                 >
-                  <option value="">—</option>
+                  <option value="">No rating</option>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
                       {n}

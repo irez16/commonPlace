@@ -109,7 +109,7 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
           value={title}
           onChange={setTitle}
           onSelect={handleAutofill}
-          placeholder="Title — start typing to search"
+          placeholder="Start typing a title..."
         />
       ) : (
         <input

@@ -163,7 +163,7 @@ export default function SettingsPage() {
 
     if (!email) {
       setPasswordStatus('error');
-      setPasswordError("Couldn't verify your account email — try logging in again.");
+      setPasswordError("Couldn't verify your account email, try logging in again.");
       return;
     }
 
@@ -225,7 +225,7 @@ export default function SettingsPage() {
       <div className="settings-section">
         <h2>Appearance</h2>
         <p className="settings-section-hint">
-          Saved on this device only — won't follow you to another device or browser.
+          Saved on this device only, so it won't follow you to another device or browser.
         </p>
         <div className="settings-toggle-row">
           {(['system', 'light', 'dark'] as ThemePreference[]).map((option) => (
@@ -267,7 +267,7 @@ export default function SettingsPage() {
         <p className="settings-section-hint">
           Defaults to your Ledger accent above. Pick a color here only if you want your
           Journal to look different from your Ledger. In dark mode, annotation text always
-          renders in a readable off-white regardless of this color — this only affects
+          renders in a readable off-white regardless of this color. This only affects
           light mode and the card border.
         </p>
         <div className="settings-swatch-row">
@@ -379,6 +379,9 @@ export default function SettingsPage() {
         <button type="button" className="settings-logout-button" onClick={handleLogout}>
           Log out
         </button>
+        <Link className="settings-legal-link" to="/legal">
+          Terms & Privacy
+        </Link>
       </div>
     </div>
   );

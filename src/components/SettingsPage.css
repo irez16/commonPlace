@@ -163,6 +163,16 @@
   border-color: var(--accent);
 }
 
+.settings-legal-link {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .settings-password-form {
   display: flex;
   flex-direction: column;

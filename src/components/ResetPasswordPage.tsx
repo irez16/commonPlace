@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
         <div className="app-form">
           <h2>Password updated</h2>
           <p className="auth-page-hint">
-            You're all set — head back and log in with your new password.
+            You're all set. Head back and log in with your new password.
           </p>
           <button type="button" className="app-form-submit" onClick={() => navigate('/')}>
             Continue

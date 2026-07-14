@@ -45,8 +45,8 @@ export async function searchBooks(query: string): Promise<MediaSearchResult[]> {
   if (res.status === 429) {
     throw new Error(
       GOOGLE_BOOKS_API_KEY
-        ? 'Book search failed (HTTP 429) — quota exceeded even with a key. Check usage in Google Cloud Console.'
-        : 'Book search failed (HTTP 429) — Google\'s free unauthenticated quota is exhausted. Add VITE_GOOGLE_BOOKS_API_KEY to fix this.'
+        ? 'Book search failed (HTTP 429): quota exceeded even with a key. Check usage in Google Cloud Console.'
+        : 'Book search failed (HTTP 429): Google\'s free unauthenticated quota is exhausted. Add VITE_GOOGLE_BOOKS_API_KEY to fix this.'
     );
   }
   if (!res.ok) await throwDetailedError(res, 'Book search');

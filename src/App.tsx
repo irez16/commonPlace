@@ -11,6 +11,7 @@ import JournalPage from './components/JournalPage';
 import PassageDetailPage from './components/PassageDetailPage';
 import NotificationsPage from './components/NotificationsPage';
 import SettingsPage from './components/SettingsPage';
+import LegalPage from './components/LegalPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/followers" element={<FollowersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/legal" element={<LegalPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/:handle/journal" element={<JournalPage />} />
         <Route path="/:handle/journal/:passageId" element={<PassageDetailPage />} />

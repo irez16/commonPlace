@@ -114,7 +114,7 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
           value={title}
           onChange={setTitle}
           onSelect={handleAutofill}
-          placeholder="Title — start typing to search"
+          placeholder="Start typing a title..."
         />
       ) : (
         <input
@@ -155,7 +155,7 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
       <label>
         Rating (optional)
         <select value={rating} onChange={(e) => setRating(e.target.value)}>
-          <option value="">—</option>
+          <option value="">No rating</option>
           {[1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>
               {n}
