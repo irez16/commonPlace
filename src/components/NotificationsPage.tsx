@@ -50,7 +50,7 @@ export default function NotificationsPage() {
                   accentColor={resolveLedgerAccent(n.otherUser?.ledger_accent)}
                   size={34}
                 />
-                <div>
+                <div className="notification-card-text">
                   <p className="notification-line">
                     {n.otherUser ? (
                       <Link to={`/@${n.otherUser.username}`} onClick={(e) => e.stopPropagation()}>

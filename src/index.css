@@ -64,6 +64,13 @@ body {
      Includes the safe-area inset since the bar itself grows by that
      amount on notched devices (see TabBar.css). */
   padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  /* Same idea, top side: clears the fixed QuickNav icons. Without this,
+     nothing reserves horizontal space for them since they're removed
+     from normal page flow — a long enough name/heading on any page
+     will eventually grow into their vertical band and visually collide,
+     regardless of how far right it extends. Reserving vertical space
+     for the whole band avoids that regardless of content width. */
+  padding-top: calc(56px + env(safe-area-inset-top));
 }
 
 /* --- Headings & titles: Fraunces --- */

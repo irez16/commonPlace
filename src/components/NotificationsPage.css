@@ -53,6 +53,11 @@
   gap: 10px;
 }
 
+.notification-card-text {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 .notification-line {
   font-family: var(--font-sans);
   font-size: 14px;

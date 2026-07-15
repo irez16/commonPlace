@@ -45,7 +45,7 @@ export default function FollowersPage() {
                   accentColor={resolveLedgerAccent(p.ledger_accent)}
                   size={40}
                 />
-                <div>
+                <div className="follow-list-row-text">
                   <div className="follow-list-row-name">{p.name}</div>
                   <div className="follow-list-row-username">@{p.username}</div>
                 </div>

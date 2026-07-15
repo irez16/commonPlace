@@ -34,11 +34,13 @@
 
 .settings-swatch-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
 .settings-avatar-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
 }
@@ -50,6 +52,7 @@
 
 .settings-toggle-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -128,6 +131,7 @@
 
 .settings-save-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-top: 28px;
