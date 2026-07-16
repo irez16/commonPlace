@@ -22,7 +22,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export default function SettingsPage() {
   useDocumentTitle('Settings');
   const { username } = useProfileStatus();
-  const { loading, profile: fetchedProfile } = usePublicProfile(username);
+  const { loading, profile: fetchedProfile } = usePublicProfile(username ?? undefined);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [status, setStatus] = useState<SaveStatus>('idle');
