@@ -4,8 +4,9 @@
    headers, Fraunces serif for titles & quotes, IBM Plex Mono
    uppercase for metadata/chips, Inter for body text.
 
-   Dark mode is intentionally NOT defined yet — that's a
-   dedicated design step. Only light-mode tokens exist below.
+   The :root block below holds the light / base tokens. Dark-mode
+   tokens are defined further down (system preference plus a
+   [data-theme] override on <html>).
    ============================================================ */
 
 :root {
@@ -148,7 +149,7 @@ button {
     --text-muted: #9C9384;
     --border: #3A352E;
 
-    --accent: #BD7373;
+    --accent: #C47A7A;
     --accent-ink: #86AEDD;
     --accent-moss: #8B9373;
     --accent-contrast: #1C1A17;
@@ -166,7 +167,7 @@ button {
   --text-muted: #9C9384;
   --border: #3A352E;
 
-  --accent: #BD7373;
+  --accent: #C47A7A;
   --accent-ink: #86AEDD;
   --accent-moss: #8B9373;
   --accent-contrast: #1C1A17;
@@ -183,12 +184,12 @@ button {
   --text-muted: #6B6357;
   --border: #D8D0BC;
 
-  --accent: #7A3B3B;
-  --accent-ink: #1F3A54;
-  --accent-moss: #6B7156;
+  --accent: #8C4444;
+  --accent-ink: #2B577D;
+  --accent-moss: #586C45;
   --accent-contrast: #F4F0E6;
 
-  --marginalia: #1F3A54;
+  --marginalia: #2B577D;
 
   color-scheme: light;
 }

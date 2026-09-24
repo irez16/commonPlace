@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'CommonPlace',
         short_name: 'CommonPlace',
-        description: 'A commonplace book for reading, watching, and listening — ledger entries and marginalia across every medium.',
+        description: 'A commonplace book for reading, watching, and listening: ledger entries and marginalia across every medium.',
         start_url: '/',
         scope: '/',
         display: 'standalone',
