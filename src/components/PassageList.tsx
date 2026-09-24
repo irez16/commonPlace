@@ -23,6 +23,9 @@ interface PassageListProps {
   // journalFont is unrelated to accent and always applies independently.
   journalCoverColor?: string | null;
   journalFont?: string | null;
+  // Owner only: turns on the Journal's edit mode from the empty state.
+  // Visitors don't get this, so they keep the plain empty message.
+  onStartClipping?: () => void;
 }
 
 interface EntryContext {
@@ -45,6 +48,7 @@ export default function PassageList({
   ledgerAccent,
   journalCoverColor,
   journalFont,
+  onStartClipping,
 }: PassageListProps) {
   const [passages, setPassages] = useState<Passage[]>([]);
   const [entryById, setEntryById] = useState<Record<string, EntryContext>>({});
@@ -132,6 +136,19 @@ export default function PassageList({
 
   if (loading) return <p className="passage-list-status">Loading journal…</p>;
   if (error) return <p className="passage-list-status" style={{ color: 'crimson' }}>{error}</p>;
+  if (passages.length === 0 && onStartClipping && readOnly) {
+    return (
+      <div className="passage-list-empty">
+        <p className="passage-list-status">
+          Clips are passages you save from something in your Ledger: a line from a book, a
+          moment in a film. Each one hangs off a Ledger entry.
+        </p>
+        <button type="button" className="passage-list-empty-action" onClick={onStartClipping}>
+          Clip your first passage
+        </button>
+      </div>
+    );
+  }
   if (passages.length === 0) {
     return (
       <p className="passage-list-status">

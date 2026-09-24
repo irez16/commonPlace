@@ -14,6 +14,10 @@ const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 interface AddPassageProps {
   userId: string;
   onAdded?: (passage: Passage) => void;
+  // Focus the first field once the form renders. Set when the form was
+  // opened from the empty state's button, which unmounts and would
+  // otherwise leave focus on <body>.
+  autoFocusFirstField?: boolean;
 }
 
 interface LedgerOption {
@@ -33,7 +37,11 @@ const NEW_SOURCE_VALUE = '__new__';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export default function AddPassage({ userId, onAdded }: AddPassageProps) {
+export default function AddPassage({
+  userId,
+  onAdded,
+  autoFocusFirstField = false,
+}: AddPassageProps) {
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [ledgerEntryId, setLedgerEntryId] = useState('');
@@ -249,6 +257,7 @@ export default function AddPassage({ userId, onAdded }: AddPassageProps) {
       <label>
         From
         <select
+          autoFocus={autoFocusFirstField}
           value={addingNewSource ? NEW_SOURCE_VALUE : ledgerEntryId}
           onChange={(e) => {
             if (e.target.value === NEW_SOURCE_VALUE) {

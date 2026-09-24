@@ -15,6 +15,9 @@ export default function JournalPage() {
   // Same pattern as the profile page: governs add/delete controls, owner
   // only, always resets to view on a fresh load.
   const [isEditingContent, setIsEditingContent] = useState(false);
+  // True only when edit mode was opened from the empty Journal's button,
+  // so the add form takes focus (the button itself disappears).
+  const [focusAddForm, setFocusAddForm] = useState(false);
   const [journalRefreshKey, setJournalRefreshKey] = useState(0);
 
   if (username && loading) return <p className="journal-page-status">Loading journal…</p>;
@@ -45,7 +48,10 @@ export default function JournalPage() {
           <button
             type="button"
             className="journal-page-edit-toggle"
-            onClick={() => setIsEditingContent((v) => !v)}
+            onClick={() => {
+              setFocusAddForm(false);
+              setIsEditingContent((v) => !v);
+            }}
           >
             {isEditingContent ? 'Done' : 'Edit'}
           </button>
@@ -53,7 +59,11 @@ export default function JournalPage() {
       </div>
 
       {contentEditable && (
-        <AddPassage userId={profile.id} onAdded={() => setJournalRefreshKey((k) => k + 1)} />
+        <AddPassage
+          userId={profile.id}
+          onAdded={() => setJournalRefreshKey((k) => k + 1)}
+          autoFocusFirstField={focusAddForm}
+        />
       )}
 
       <PassageList
@@ -64,6 +74,14 @@ export default function JournalPage() {
         ledgerAccent={profile.ledger_accent}
         journalCoverColor={profile.journal_cover_color}
         journalFont={profile.journal_font}
+        onStartClipping={
+          isOwnProfile
+            ? () => {
+                setFocusAddForm(true);
+                setIsEditingContent(true);
+              }
+            : undefined
+        }
       />
     </div>
   );

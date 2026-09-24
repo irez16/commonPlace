@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useProfileStatus } from '../hooks/useProfileStatus';
-import { useNotifications } from '../hooks/useNotifications';
+import { useUnreadCount } from '../hooks/useUnreadCount';
 import './QuickNav.css';
 
 // Top-right icon nav: notifications (In Common), then Settings as the
 // rightmost icon.
 export default function QuickNav() {
-  const { username } = useProfileStatus();
-  const { unreadCount } = useNotifications();
+  const { user, username } = useProfileStatus();
+  const { count: unreadCount } = useUnreadCount(username ? user?.id ?? null : null);
 
   if (!username) return null;
 

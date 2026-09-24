@@ -92,6 +92,22 @@
   border-color: var(--text-muted);
 }
 
+/* Shown only when neither the share sheet nor the clipboard worked, so
+   the link can be selected and copied by hand. */
+.profile-header-share-url {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
 /* --- Edit form --- */
 .profile-header-form {
   display: flex;

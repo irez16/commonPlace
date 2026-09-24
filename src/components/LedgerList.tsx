@@ -27,6 +27,9 @@ interface LedgerListProps {
   // Called with the new pinned id (or null) whenever the pin changes —
   // including implicitly, when the pinned entry is deleted.
   onPinnedChanged?: (id: string | null) => void;
+  // Owner only: turns on the profile's edit mode from the empty state.
+  // Visitors don't get this, so they keep the plain empty message.
+  onAddFirst?: () => void;
 }
 
 interface EditDraft {
@@ -46,6 +49,7 @@ export default function LedgerList({
   readOnly = false,
   pinnedId = null,
   onPinnedChanged,
+  onAddFirst,
 }: LedgerListProps) {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,6 +176,20 @@ export default function LedgerList({
 
   if (loading) return <p className="ledger-loading">Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
   if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (entries.length === 0 && onAddFirst) {
+    // Already in edit mode, the add form is right above this list.
+    if (!readOnly) return <p className="ledger-empty">Add your first entry above.</p>;
+    return (
+      <div className="ledger-empty-state">
+        <p className="ledger-empty">
+          Your Ledger is empty. Log what you're reading, watching, or listening to.
+        </p>
+        <button type="button" className="ledger-empty-action" onClick={onAddFirst}>
+          Add your first entry
+        </button>
+      </div>
+    );
+  }
   if (entries.length === 0) {
     return <p className="ledger-empty">Nothing in {readOnly ? 'the' : 'your'} ledger yet.</p>;
   }

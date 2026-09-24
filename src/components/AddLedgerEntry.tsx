@@ -13,9 +13,17 @@ const LINK_AUTOFILL_TYPES: MediaType[] = ['youtube', 'substack', 'essay'];
 interface AddLedgerEntryProps {
   userId: string;
   onAdded?: (entry: LedgerEntry) => void;
+  // Focus the first field on mount. Set when the form was opened from the
+  // empty state's button, which unmounts and would otherwise leave focus
+  // on <body>.
+  autoFocusFirstField?: boolean;
 }
 
-export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps) {
+export default function AddLedgerEntry({
+  userId,
+  onAdded,
+  autoFocusFirstField = false,
+}: AddLedgerEntryProps) {
   const [mediaType, setMediaType] = useState<MediaType>('book');
   const [title, setTitle] = useState('');
   const [creator, setCreator] = useState('');
@@ -95,6 +103,7 @@ export default function AddLedgerEntry({ userId, onAdded }: AddLedgerEntryProps)
         <select
           value={mediaType}
           onChange={(e) => setMediaType(e.target.value as MediaType)}
+          autoFocus={autoFocusFirstField}
         >
           {MEDIA_TYPES.map((type) => (
             <option key={type} value={type}>

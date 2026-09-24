@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { InCommonNotification, Profile } from '../types';
+import { NOTIFICATIONS_CHANGED_EVENT } from './useUnreadCount';
 
 export interface NotificationItem extends InCommonNotification {
   otherUser: {
@@ -150,6 +151,8 @@ export function useNotifications(): NotificationsState {
   const markAsRead = useCallback(async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
     await supabase.from('in_common_notifications').update({ is_read: true }).eq('id', id);
+    // Lets the bell badge (useUnreadCount) refetch right away.
+    window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;

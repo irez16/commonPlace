@@ -39,6 +39,8 @@ export default function SettingsPage() {
   const [passwordStatus, setPasswordStatus] = useState<SaveStatus>('idle');
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
   useEffect(() => {
     if (fetchedProfile) setProfile(fetchedProfile);
   }, [fetchedProfile]);
@@ -134,7 +136,15 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    setLogoutError(null);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      // Stay put: navigating away would look like a successful logout
+      // while the session is actually still active. Fixed copy: the raw
+      // server message can be unhelpful (a 5xx body renders as "{}").
+      setLogoutError("Couldn't log out. Check your connection and try again.");
+      return;
+    }
     // Client-side nav, not a hard reload — Dashboard's auth listener
     // (useProfileStatus) picks up the SIGNED_OUT event and renders the
     // login screen itself once we're on "/".
@@ -387,6 +397,7 @@ export default function SettingsPage() {
         <button type="button" className="settings-logout-button" onClick={handleLogout}>
           Log out
         </button>
+        {logoutError && <span className="settings-error">{logoutError}</span>}
         <Link className="settings-legal-link" to="/legal">
           Terms & Privacy
         </Link>

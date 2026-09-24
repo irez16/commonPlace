@@ -119,6 +119,26 @@
   color: var(--accent);
 }
 
+.ledger-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ledger-empty-action {
+  background: none;
+  border: 1px solid var(--ledger-accent, var(--accent));
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: var(--ledger-accent, var(--accent));
+  cursor: pointer;
+}
+
 .ledger-empty,
 .ledger-loading {
   font-family: var(--font-sans);

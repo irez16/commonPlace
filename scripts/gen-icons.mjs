@@ -1,55 +1,94 @@
+// Generates the app icon set from the logomark (see logomark.mjs): an
+// italic Fraunces "c" with a wine ribbon bookmark hanging from the top edge.
+//
+// Writes:
+//   public/favicon.svg                 rounded tile, follows the browser's
+//                                      light/dark preference
+//   public/icons/icon-{192,512}.png    "any" purpose: rounded tile,
+//                                      transparent corners
+//   public/icons/icon-maskable-*.png   full-bleed bone square with the mark
+//                                      (and a shorter ribbon) inside the
+//                                      central 80% safe zone, so a circle or
+//                                      squircle mask never clips it
+//   public/icons/apple-touch-icon.png  full-bleed bone square (iOS rounds
+//                                      the corners itself; no transparency)
+//   public/icons/favicon-{16,32}.png   PNG fallbacks for the SVG favicon
+//
+// Run: node scripts/gen-icons.mjs
 import sharp from 'sharp';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import {
+  C_PATH,
+  DARK,
+  HANGING_RIBBON,
+  LIGHT,
+  MASKABLE_CENTER,
+  MASKABLE_RIBBON,
+  MASKABLE_SCALE,
+  S,
+  TILE_RADIUS,
+  tileSvg,
+} from './logomark.mjs';
 
-const svg = readFileSync(new URL('../public/favicon.svg', import.meta.url));
-const BONE = '#EAE4D6';
+function maskableSvg(colors) {
+  const { x, y } = MASKABLE_CENTER;
+  // Scale about the mark's centre, then put that centre at the canvas centre.
+  const transform = `translate(${S / 2} ${S / 2}) scale(${MASKABLE_SCALE}) translate(${-x} ${-y})`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}">
+  <rect width="${S}" height="${S}" fill="${colors.bg}"/>
+  <g transform="${transform}">
+    <path fill="${colors.ribbon}" d="${MASKABLE_RIBBON}"/>
+    <path fill="${colors.ink}" d="${C_PATH}"/>
+  </g>
+</svg>
+`;
+}
+
+// The browser-tab favicon. Presentation attributes carry the light colours
+// (for renderers without CSS); the style block switches to the dark
+// palette when the browser prefers dark.
+function faviconSvg() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}">
+  <title>CommonPlace</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: ${DARK.bg}; }
+      .ribbon { fill: ${DARK.ribbon}; }
+      .ink { fill: ${DARK.ink}; }
+    }
+  </style>
+  <rect class="bg" width="${S}" height="${S}" rx="${TILE_RADIUS}" fill="${LIGHT.bg}"/>
+  <path class="ribbon" fill="${LIGHT.ribbon}" d="${HANGING_RIBBON}"/>
+  <path class="ink" fill="${LIGHT.ink}" d="${C_PATH}"/>
+</svg>
+`;
+}
+
+const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 const iconsDir = fileURLToPath(new URL('../public/icons/', import.meta.url));
-
 mkdirSync(iconsDir, { recursive: true });
 
-async function makeIcon({ name, size, padding, background, squareBg }) {
-  const logoSize = Math.round(size * (1 - padding * 2));
-  // favicon viewBox is 48x46 (not square) — fit within logoSize box preserving aspect
-  const w = logoSize;
-  const h = Math.round(logoSize * (46 / 48));
-  const logo = await sharp(svg, { density: 1200 })
-    .resize(w, h, { fit: 'contain' })
-    .toBuffer();
+writeFileSync(publicDir + 'favicon.svg', faviconSvg());
+console.log('wrote favicon.svg');
 
-  let canvas = sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: squareBg ? background : { r: 0, g: 0, b: 0, alpha: 0 },
-    },
-  });
-
-  const left = Math.round((size - w) / 2);
-  const top = Math.round((size - h) / 2);
-
-  await canvas
-    .composite([{ input: logo, left, top }])
-    .png()
-    .toFile(iconsDir + name);
+async function render(svg, size, name, { opaque }) {
+  // Rasterised at the SVG's native 512px, then downsampled.
+  let image = sharp(Buffer.from(svg)).resize(size, size);
+  // Opaque icons drop the alpha channel so nothing can show through.
+  if (opaque) image = image.removeAlpha();
+  await image.png({ compressionLevel: 9 }).toFile(iconsDir + name);
   console.log('wrote', name);
 }
 
-const jobs = [
-  // Standard "any" purpose icons — transparent background, logo fills most of the frame
-  { name: 'icon-192.png', size: 192, padding: 0.12, squareBg: false },
-  { name: 'icon-512.png', size: 512, padding: 0.12, squareBg: false },
-  // Maskable icons — opaque bone background, generous safe-zone padding
-  { name: 'icon-maskable-192.png', size: 192, padding: 0.25, background: BONE, squareBg: true },
-  { name: 'icon-maskable-512.png', size: 512, padding: 0.25, background: BONE, squareBg: true },
-  // iOS home screen icon — opaque, no transparency, iOS applies its own rounding
-  { name: 'apple-touch-icon.png', size: 180, padding: 0.16, background: BONE, squareBg: true },
-  // Browser favicon PNG fallbacks
-  { name: 'favicon-32.png', size: 32, padding: 0.06, squareBg: false },
-  { name: 'favicon-16.png', size: 16, padding: 0.04, squareBg: false },
-];
+const rounded = tileSvg(LIGHT, { rounded: true });
+const square = tileSvg(LIGHT, { rounded: false });
+const maskable = maskableSvg(LIGHT);
 
-for (const job of jobs) {
-  await makeIcon(job);
-}
+await render(rounded, 192, 'icon-192.png', { opaque: false });
+await render(rounded, 512, 'icon-512.png', { opaque: false });
+await render(maskable, 192, 'icon-maskable-192.png', { opaque: true });
+await render(maskable, 512, 'icon-maskable-512.png', { opaque: true });
+await render(square, 180, 'apple-touch-icon.png', { opaque: true });
+await render(rounded, 32, 'favicon-32.png', { opaque: false });
+await render(rounded, 16, 'favicon-16.png', { opaque: false });

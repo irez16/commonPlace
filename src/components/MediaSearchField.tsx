@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import type { KeyboardEvent } from 'react';
 import { searchBooks, searchPodcasts, searchFilms, getFilmDetails } from '../lib/mediaSearch';
 import type { MediaSearchResult } from '../lib/mediaSearch';
@@ -33,90 +33,127 @@ export default function MediaSearchField({
   placeholder,
 }: MediaSearchFieldProps) {
   const [results, setResults] = useState<MediaSearchResult[]>([]);
+  // Which query (media type + trimmed text) `results` were fetched for.
+  // Results only count as current while this matches what's in the
+  // input right now; anything else is stale and is neither shown nor
+  // selectable from the keyboard.
+  const [resultsKey, setResultsKey] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
+  // Same idea for the "Searching..." hint: keyed to the query it's for, so
+  // a superseded request can't leave it stuck on screen.
+  const [searchingKey, setSearchingKey] = useState<string | null>(null);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
+  // Bumped whenever a search starts, the person types, or a result is
+  // picked. An async response only applies if the id it started with is
+  // still the latest, so an older, slower search can never overwrite newer
+  // results or reopen the dropdown after a selection.
+  const requestIdRef = useRef(0);
   // Selecting a result updates `value` via the parent's onSelect handler
   // (it sets the title to the picked result). That value change would
   // otherwise look identical to the person typing something new, and
-  // trigger another search. This flag lets handleSelect mark the very
-  // next value change as "not a real edit" so it's skipped.
-  const skipNextSearchRef = useRef(false);
+  // trigger another search. handleSelect records the media type + title it
+  // handed to the parent here so the effect can skip exactly that value;
+  // any real keystroke clears it.
+  const skipSearchForRef = useRef<string | null>(null);
+  const listboxId = useId();
+  const optionId = (i: number) => `${listboxId}-option-${i}`;
+
+  const currentKey = `${mediaType}:${value.trim()}`;
+  const listVisible = open && resultsKey === currentKey && results.length > 0;
+  const activeIndex = listVisible ? highlightedIndex : -1;
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    if (skipNextSearchRef.current) {
-      skipNextSearchRef.current = false;
+    if (skipSearchForRef.current === `${mediaType}:${value}`) {
       return;
     }
 
-    if (!value.trim()) {
-      setResults([]);
-      setOpen(false);
-      setHighlightedIndex(-1);
-      return;
-    }
+    const query = value.trim();
+    // Empty input: nothing to search. Old results are already hidden
+    // because their key no longer matches.
+    if (!query) return;
+
+    const key = `${mediaType}:${query}`;
+    // Set by cleanup once this query is superseded (or on unmount).
+    let cancelled = false;
+    const isStale = (requestId: number) => cancelled || requestId !== requestIdRef.current;
 
     debounceRef.current = setTimeout(async () => {
-      setSearching(true);
+      const requestId = ++requestIdRef.current;
+      setSearchingKey(key);
       setError(null);
       try {
-        const found = await SEARCH_FN[mediaType](value);
+        const found = await SEARCH_FN[mediaType](query);
+        if (isStale(requestId)) return;
         setResults(found);
+        setResultsKey(key);
         setOpen(true);
         setHighlightedIndex(-1);
       } catch (err) {
+        if (isStale(requestId)) return;
         setError(err instanceof Error ? err.message : 'Search failed.');
       } finally {
-        setSearching(false);
+        if (!isStale(requestId)) setSearchingKey(null);
       }
     }, 350);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      // Ignore anything already in flight for the old query.
+      cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, mediaType]);
 
   // Keep the keyboard-highlighted option visible when arrowing past what
   // currently fits in the scrollable dropdown.
   useEffect(() => {
-    if (highlightedIndex < 0) return;
-    optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
-  }, [highlightedIndex]);
+    if (activeIndex < 0) return;
+    optionRefs.current[activeIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [activeIndex]);
+
+  const closeList = () => {
+    setOpen(false);
+    setHighlightedIndex(-1);
+  };
 
   const handleSelect = async (result: MediaSearchResult) => {
-    skipNextSearchRef.current = true;
+    // Cancel any pending or in-flight search so it can't reopen the list.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const selectId = ++requestIdRef.current;
 
     if (mediaType === 'film' && result.imdbId) {
       setResolvingId(result.imdbId);
       setError(null);
       try {
         const full = await getFilmDetails(result.imdbId);
+        // The person kept typing while details loaded; don't clobber it.
+        if (selectId !== requestIdRef.current) return;
+        skipSearchForRef.current = `${mediaType}:${full.title}`;
         onSelect(full);
       } catch (err) {
+        if (selectId !== requestIdRef.current) return;
         setError(err instanceof Error ? err.message : 'Failed to load film details.');
-        skipNextSearchRef.current = false;
         return;
       } finally {
         setResolvingId(null);
       }
     } else {
+      skipSearchForRef.current = `${mediaType}:${result.title}`;
       onSelect(result);
     }
     setResults([]);
-    setOpen(false);
-    setHighlightedIndex(-1);
+    setResultsKey(null);
+    closeList();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!open || results.length === 0) return;
+    // Keys pressed while an IME is composing belong to the IME.
+    if (e.nativeEvent.isComposing) return;
+    if (!listVisible) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -125,18 +162,15 @@ export default function MediaSearchField({
       e.preventDefault();
       setHighlightedIndex((i) => (i - 1 < 0 ? results.length - 1 : i - 1));
     } else if (e.key === 'Enter') {
-      // No highlight yet (the most common flow: type, then hit Enter
-      // immediately) — treat it as picking the top/best match, same as
-      // a standard combobox, rather than letting the keystroke fall
-      // through to a native form submit with unresolved text.
-      const indexToSelect = highlightedIndex >= 0 ? highlightedIndex : 0;
-      if (indexToSelect < results.length) {
+      // Enter only picks a result the person has explicitly arrowed to.
+      // With nothing highlighted it falls through to the form as normal,
+      // keeping exactly what they typed (the manual-entry path).
+      if (activeIndex >= 0 && activeIndex < results.length) {
         e.preventDefault();
-        handleSelect(results[indexToSelect]);
+        handleSelect(results[activeIndex]);
       }
     } else if (e.key === 'Escape') {
-      setOpen(false);
-      setHighlightedIndex(-1);
+      closeList();
     }
   };
 
@@ -145,36 +179,47 @@ export default function MediaSearchField({
       <input
         type="text"
         placeholder={placeholder ?? 'Title'}
+        aria-label="Title"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => results.length > 0 && setOpen(true)}
+        onChange={(e) => {
+          // A real edit: any highlight belonged to the previous text.
+          skipSearchForRef.current = null;
+          // Also supersedes a film-details lookup still in flight, so it
+          // can't overwrite what's being typed now.
+          requestIdRef.current++;
+          setHighlightedIndex(-1);
+          onChange(e.target.value);
+        }}
+        onFocus={() => {
+          if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+          if (results.length > 0) setOpen(true);
+        }}
         onBlur={() => {
           // Delay so a click on a dropdown item registers before we close it.
-          closeTimeoutRef.current = setTimeout(() => setOpen(false), 150);
+          closeTimeoutRef.current = setTimeout(closeList, 150);
         }}
         onKeyDown={handleKeyDown}
         role="combobox"
-        aria-expanded={open}
-        aria-controls="media-search-results-listbox"
-        aria-activedescendant={
-          highlightedIndex >= 0 ? `media-search-option-${highlightedIndex}` : undefined
-        }
+        aria-autocomplete="list"
+        aria-expanded={listVisible}
+        aria-controls={listboxId}
+        aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
       />
-      {searching && <span className="media-search-status">Searching…</span>}
+      {searchingKey === currentKey && <span className="media-search-status">Searching…</span>}
       {error && <p className="app-form-error">{error}</p>}
 
-      {open && results.length > 0 && (
-        <ul className="media-search-results" role="listbox" id="media-search-results-listbox">
+      {listVisible && (
+        <ul className="media-search-results" role="listbox" id={listboxId}>
           {results.map((result, i) => (
             <li
               key={result.imdbId ?? `${result.title}-${i}`}
-              id={`media-search-option-${i}`}
+              id={optionId(i)}
               ref={(el) => {
                 optionRefs.current[i] = el;
               }}
-              className={`media-search-result${i === highlightedIndex ? ' is-highlighted' : ''}`}
+              className={`media-search-result${i === activeIndex ? ' is-highlighted' : ''}`}
               role="option"
-              aria-selected={i === highlightedIndex}
+              aria-selected={i === activeIndex}
               onMouseDown={(e) => {
                 // onMouseDown fires before the input's onBlur, so the click
                 // registers before the dropdown closes.

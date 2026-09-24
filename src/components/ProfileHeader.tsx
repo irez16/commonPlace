@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useFollowCounts } from '../hooks/useFollowCounts';
@@ -31,6 +31,45 @@ export default function ProfileHeader({
   const [draft, setDraft] = useState<EditDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 'copied' shows "Link copied" briefly after the clipboard fallback;
+  // 'manual' means sharing and copying both failed, so the URL is shown
+  // as selectable text instead.
+  const [shareState, setShareState] = useState<'idle' | 'copied' | 'manual'>('idle');
+  const copiedTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
+  const profileUrl = `${window.location.origin}/@${profile.username}`;
+
+  const shareProfile = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${profile.name} on CommonPlace`, url: profileUrl });
+        return;
+      } catch (err) {
+        // Dismissing the share sheet isn't a failure.
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        // Anything else (e.g. share not allowed here): fall through to copy.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      setShareState('copied');
+      window.clearTimeout(copiedTimer.current);
+      copiedTimer.current = window.setTimeout(() => setShareState('idle'), 2000);
+    } catch {
+      setShareState('manual');
+    }
+  };
+
+  const shareButton = (
+    <button type="button" className="profile-header-button" onClick={shareProfile}>
+      {shareState === 'copied' ? 'Link copied' : 'Share profile'}
+    </button>
+  );
+  const manualShareUrl = shareState === 'manual' && (
+    <p className="profile-header-share-url">{profileUrl}</p>
+  );
+
   const { loading: countsLoading, followerCount, followingCount } = useFollowCounts(
     isOwnProfile ? profile.id : undefined
   );
@@ -172,13 +211,17 @@ export default function ProfileHeader({
             <button type="button" className="profile-header-button" onClick={startEdit}>
               Edit profile
             </button>
+            {shareButton}
           </div>
+          {manualShareUrl}
         </>
       ) : (
         <div className="profile-header-actions">
           <FollowButton viewerId={viewerId} targetUserId={profile.id} />
+          {shareButton}
         </div>
       )}
+      {!isOwnProfile && manualShareUrl}
       </div>
     </div>
   );

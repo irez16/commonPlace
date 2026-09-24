@@ -21,12 +21,11 @@ export const meta = {
 
 const REPO_URL = 'https://github.com/irez16/commonPlace.git'
 
-// Inlined rather than read from the clone: TEAM_CHARTER.md and .claude/agents/*.md
-// exist locally and were handed to the CEO as files, but haven't been pushed to
-// origin yet (this sandbox has no push access to the repo — see
-// HOW_THE_TEAM_WORKS.md) — so a fresh clone of REPO_URL won't have them yet.
-// Once they're committed upstream, these prompts can go back to just pointing
-// agents at the files instead of duplicating their content here.
+// Inlined rather than read from the clone. TEAM_CHARTER.md and .claude/agents/*.md
+// are now committed upstream, so a fresh clone of REPO_URL does have them; these
+// prompts could go back to just pointing agents at the files instead of
+// duplicating their content here. Until that cleanup happens, keep the inlined
+// copies in sync with the files.
 const CHARTER = `
 CommonPlace: React 19 + TypeScript + Vite + React Router 7, Supabase (Auth/Postgres/Storage/Edge Functions),
 Sentry, hCaptcha, installable as a PWA. Locked design: bone paper background (#EAE4D6), wine/oxblood accent

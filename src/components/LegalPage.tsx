@@ -114,6 +114,12 @@ export default function LegalPage() {
             is shared with them.
           </li>
           <li>
+            <strong>Cover images</strong>: book covers, film posters, and podcast artwork
+            load directly from the image servers of the services they come from: Amazon
+            (film posters supplied by OMDb), Apple, and Google. Those servers see your IP
+            address when the images load, the same as any image loaded from another site.
+          </li>
+          <li>
             <strong>hCaptcha</strong>: used on login, signup, and password-reset forms to
             help prevent automated abuse.
           </li>

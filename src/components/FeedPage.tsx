@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useFeed } from '../hooks/useFeed';
+import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import SaveToListButton from './SaveToListButton';
 import Avatar from './Avatar';
 import { MEDIA_TYPE_LABELS } from '../types';
@@ -13,9 +15,46 @@ function formatConsumedDate(dateStr: string): string {
   return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
 }
 
+function PeopleResults({ search }: { search: ReturnType<typeof usePeopleSearch> }) {
+  if (search.loading) return <p className="feed-status">Searching…</p>;
+  if (search.error) {
+    return (
+      <p className="feed-status" style={{ color: 'crimson' }}>
+        {search.error}
+      </p>
+    );
+  }
+  if (search.results.length === 0) return <p className="feed-status">No one found.</p>;
+
+  return (
+    <ul className="feed-people-list" aria-label="People">
+      {search.results.map((person) => (
+        <li key={person.id}>
+          <Link className="feed-person" to={`/@${person.username}`}>
+            {/* Each person's avatar uses their own Ledger accent, same
+                rule as the feed cards. */}
+            <Avatar
+              name={person.name}
+              url={person.avatar_url}
+              accentColor={resolveLedgerAccent(person.ledger_accent)}
+            />
+            <span className="feed-card-header-text">
+              <span className="feed-card-author-name">{person.name}</span>
+              <span className="feed-person-username">@{person.username}</span>
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function FeedPage() {
   useDocumentTitle('Feed');
   const { loading, needsAuth, error, entries, viewerId } = useFeed();
+  const [searchQuery, setSearchQuery] = useState('');
+  const search = usePeopleSearch(searchQuery, viewerId);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   if (needsAuth) {
     return (
@@ -27,18 +66,41 @@ export default function FeedPage() {
     );
   }
 
-  if (loading) return <div className="feed-page"><p className="feed-status">Loading feed…</p></div>;
-  if (error) return <div className="feed-page"><p className="feed-status" style={{ color: 'crimson' }}>{error}</p></div>;
-
   return (
     <div className="feed-page">
       <h1>Feed</h1>
 
-      {entries.length === 0 ? (
-        <p className="feed-status">
-          Nothing here yet. Follow people to see what they're reading, watching, and
-          listening to.
-        </p>
+      <input
+        ref={searchInputRef}
+        className="feed-search-input"
+        type="search"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search people by name or @username"
+        aria-label="Search people by name or username"
+        autoComplete="off"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+      />
+
+      {search.active ? (
+        <PeopleResults search={search} />
+      ) : loading ? (
+        <p className="feed-status">Loading feed…</p>
+      ) : error ? (
+        <p className="feed-status" style={{ color: 'crimson' }}>{error}</p>
+      ) : entries.length === 0 ? (
+        <div className="feed-empty">
+          <p className="feed-status">Your Feed shows what people you follow log.</p>
+          <button
+            type="button"
+            className="feed-empty-action"
+            onClick={() => searchInputRef.current?.focus()}
+          >
+            Find people
+          </button>
+        </div>
       ) : (
         <ul className="feed-list">
           {entries.map((entry) => {

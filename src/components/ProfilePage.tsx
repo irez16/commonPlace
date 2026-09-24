@@ -27,6 +27,9 @@ export default function ProfilePage() {
   // only, and always resets to false on a fresh page load, so your own
   // page defaults to looking exactly like anyone else's visit.
   const [isEditingContent, setIsEditingContent] = useState(false);
+  // True only when edit mode was opened from the empty Ledger's button,
+  // so the add form takes focus (the button itself disappears).
+  const [focusAddForm, setFocusAddForm] = useState(false);
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
 
@@ -82,7 +85,10 @@ export default function ProfilePage() {
             <button
               type="button"
               className="profile-section-edit-toggle"
-              onClick={() => setIsEditingContent((v) => !v)}
+              onClick={() => {
+                setFocusAddForm(false);
+                setIsEditingContent((v) => !v);
+              }}
             >
               {isEditingContent ? 'Done' : 'Edit'}
             </button>
@@ -93,6 +99,7 @@ export default function ProfilePage() {
           <AddLedgerEntry
             userId={displayedProfile.id}
             onAdded={() => setLedgerRefreshKey((k) => k + 1)}
+            autoFocusFirstField={focusAddForm}
           />
         )}
 
@@ -104,6 +111,14 @@ export default function ProfilePage() {
           pinnedId={displayedProfile.pinned_ledger_entry_id}
           onPinnedChanged={(id) =>
             setLiveProfile({ ...displayedProfile, pinned_ledger_entry_id: id })
+          }
+          onAddFirst={
+            isOwnProfile
+              ? () => {
+                  setFocusAddForm(true);
+                  setIsEditingContent(true);
+                }
+              : undefined
           }
         />
 
