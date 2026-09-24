@@ -171,7 +171,13 @@ export default function PassageList({
               )}
               {passage.clip_type === 'image' && passage.media_path && (
                 <div className="passage-card-media">
-                  <img src={mediaUrl(passage.media_path)} alt="" />
+                  <img
+                    src={mediaUrl(passage.media_path)}
+                    alt={
+                      passage.annotation ||
+                      `Image clip from ${entry?.title ?? 'a Journal entry'}`
+                    }
+                  />
                 </div>
               )}
             </Link>

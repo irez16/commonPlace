@@ -70,13 +70,16 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
         Enter your email and we'll send you a link to set a new password.
       </p>
       {error && <p className="app-form-error">{error}</p>}
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+      <label>
+        Email
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </label>
 
       <Captcha ref={captchaRef} onToken={setCaptchaToken} />
 

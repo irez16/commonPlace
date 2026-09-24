@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent, ChangeEvent, CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -22,6 +22,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export default function SettingsPage() {
   useDocumentTitle('Settings');
   const { username } = useProfileStatus();
+  const navigate = useNavigate();
   const { loading, profile: fetchedProfile } = usePublicProfile(username ?? undefined);
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -134,7 +135,10 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = '/';
+    // Client-side nav, not a hard reload — Dashboard's auth listener
+    // (useProfileStatus) picks up the SIGNED_OUT event and renders the
+    // login screen itself once we're on "/".
+    navigate('/', { replace: true });
   };
 
   const changePassword = async (e: FormEvent) => {
@@ -233,6 +237,7 @@ export default function SettingsPage() {
               key={option}
               type="button"
               className={`settings-toggle${theme === option ? ' is-selected' : ''}`}
+              aria-pressed={theme === option}
               onClick={() => setThemePreference(option)}
             >
               {option === 'system' ? 'System' : option === 'light' ? 'Light' : 'Dark'}
@@ -253,6 +258,7 @@ export default function SettingsPage() {
               type="button"
               className={`settings-swatch${profile.ledger_accent === key ? ' is-selected' : ''}`}
               style={{ '--swatch-ring-color': opt.cssVar } as CSSProperties & Record<string, string>}
+              aria-pressed={profile.ledger_accent === key}
               onClick={() => saveField({ ledger_accent: key as Profile['ledger_accent'] })}
             >
               <span className="settings-swatch-dot" style={{ background: opt.cssVar }} />
@@ -279,6 +285,7 @@ export default function SettingsPage() {
                 '--swatch-ring-color': resolveLedgerAccent(profile.ledger_accent),
               } as CSSProperties & Record<string, string>
             }
+            aria-pressed={!profile.journal_cover_color}
             onClick={() => saveField({ journal_cover_color: null })}
           >
             <span
@@ -293,6 +300,7 @@ export default function SettingsPage() {
               type="button"
               className={`settings-swatch${profile.journal_cover_color === preset.hex ? ' is-selected' : ''}`}
               style={{ '--swatch-ring-color': preset.hex } as CSSProperties & Record<string, string>}
+              aria-pressed={profile.journal_cover_color === preset.hex}
               onClick={() => saveField({ journal_cover_color: preset.hex })}
             >
               <span className="settings-swatch-dot" style={{ background: preset.hex }} />

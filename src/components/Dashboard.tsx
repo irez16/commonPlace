@@ -7,7 +7,7 @@ import ForgotPasswordRequest from './ForgotPasswordRequest';
 import './AuthPage.css';
 
 export default function Dashboard() {
-  const { loading, user, hasProfile, username } = useProfileStatus();
+  const { loading, user, hasProfile, username, refresh } = useProfileStatus();
   const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot'>('login');
 
   if (loading) return <p className="auth-page-hint">Loading…</p>;
@@ -19,7 +19,7 @@ export default function Dashboard() {
       return (
         <div className="auth-page">
           <div className="auth-page-wordmark">commonplace</div>
-          <SignUp onComplete={() => window.location.reload()} />
+          <SignUp onComplete={refresh} />
           <p className="auth-page-switch">
             Already have an account?{' '}
             <button type="button" onClick={() => setAuthView('login')}>
@@ -41,7 +41,7 @@ export default function Dashboard() {
       <div className="auth-page">
         <div className="auth-page-wordmark">commonplace</div>
         <Login
-          onComplete={() => window.location.reload()}
+          onComplete={refresh}
           onSwitchToSignUp={() => setAuthView('signup')}
           onForgotPassword={() => setAuthView('forgot')}
         />
@@ -54,7 +54,7 @@ export default function Dashboard() {
     return (
       <div className="auth-page">
         <div className="auth-page-wordmark">commonplace</div>
-        <SignUp startAtProfileStep onComplete={() => window.location.reload()} />
+        <SignUp startAtProfileStep onComplete={refresh} />
       </div>
     );
   }

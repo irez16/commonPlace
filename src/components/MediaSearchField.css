@@ -34,7 +34,8 @@
   cursor: pointer;
 }
 
-.media-search-result:hover {
+.media-search-result:hover,
+.media-search-result.is-highlighted {
   background: var(--bg);
 }
 

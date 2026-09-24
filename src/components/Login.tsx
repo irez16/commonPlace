@@ -49,20 +49,26 @@ export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }
     <form className="app-form" onSubmit={handleSubmit}>
       <h2>Log in</h2>
       {error && <p className="app-form-error">{error}</p>}
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+      <label>
+        Email
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </label>
+      <label>
+        Password
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </label>
 
       <Captcha ref={captchaRef} onToken={setCaptchaToken} />
 

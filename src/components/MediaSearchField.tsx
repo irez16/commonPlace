@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 import { searchBooks, searchPodcasts, searchFilms, getFilmDetails } from '../lib/mediaSearch';
 import type { MediaSearchResult } from '../lib/mediaSearch';
 import type { MediaType } from '../types';
@@ -36,8 +37,10 @@ export default function MediaSearchField({
   const [searching, setSearching] = useState(false);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
   // Selecting a result updates `value` via the parent's onSelect handler
   // (it sets the title to the picked result). That value change would
   // otherwise look identical to the person typing something new, and
@@ -56,6 +59,7 @@ export default function MediaSearchField({
     if (!value.trim()) {
       setResults([]);
       setOpen(false);
+      setHighlightedIndex(-1);
       return;
     }
 
@@ -66,6 +70,7 @@ export default function MediaSearchField({
         const found = await SEARCH_FN[mediaType](value);
         setResults(found);
         setOpen(true);
+        setHighlightedIndex(-1);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Search failed.');
       } finally {
@@ -78,6 +83,13 @@ export default function MediaSearchField({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, mediaType]);
+
+  // Keep the keyboard-highlighted option visible when arrowing past what
+  // currently fits in the scrollable dropdown.
+  useEffect(() => {
+    if (highlightedIndex < 0) return;
+    optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIndex]);
 
   const handleSelect = async (result: MediaSearchResult) => {
     skipNextSearchRef.current = true;
@@ -100,6 +112,32 @@ export default function MediaSearchField({
     }
     setResults([]);
     setOpen(false);
+    setHighlightedIndex(-1);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!open || results.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i + 1 >= results.length ? 0 : i + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i - 1 < 0 ? results.length - 1 : i - 1));
+    } else if (e.key === 'Enter') {
+      // No highlight yet (the most common flow: type, then hit Enter
+      // immediately) — treat it as picking the top/best match, same as
+      // a standard combobox, rather than letting the keystroke fall
+      // through to a native form submit with unresolved text.
+      const indexToSelect = highlightedIndex >= 0 ? highlightedIndex : 0;
+      if (indexToSelect < results.length) {
+        e.preventDefault();
+        handleSelect(results[indexToSelect]);
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      setHighlightedIndex(-1);
+    }
   };
 
   return (
@@ -114,16 +152,29 @@ export default function MediaSearchField({
           // Delay so a click on a dropdown item registers before we close it.
           closeTimeoutRef.current = setTimeout(() => setOpen(false), 150);
         }}
+        onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-expanded={open}
+        aria-controls="media-search-results-listbox"
+        aria-activedescendant={
+          highlightedIndex >= 0 ? `media-search-option-${highlightedIndex}` : undefined
+        }
       />
       {searching && <span className="media-search-status">Searching…</span>}
       {error && <p className="app-form-error">{error}</p>}
 
       {open && results.length > 0 && (
-        <ul className="media-search-results">
+        <ul className="media-search-results" role="listbox" id="media-search-results-listbox">
           {results.map((result, i) => (
             <li
               key={result.imdbId ?? `${result.title}-${i}`}
-              className="media-search-result"
+              id={`media-search-option-${i}`}
+              ref={(el) => {
+                optionRefs.current[i] = el;
+              }}
+              className={`media-search-result${i === highlightedIndex ? ' is-highlighted' : ''}`}
+              role="option"
+              aria-selected={i === highlightedIndex}
               onMouseDown={(e) => {
                 // onMouseDown fires before the input's onBlur, so the click
                 // registers before the dropdown closes.

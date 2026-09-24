@@ -89,7 +89,12 @@ export default function FollowButton({ viewerId, targetUserId }: FollowButtonPro
     return <Link to="/">Log in to follow</Link>;
   }
 
-  if (loading) return <button type="button" className="follow-button" disabled>…</button>;
+  if (loading)
+    return (
+      <button type="button" className="follow-button" disabled aria-label="Loading">
+        …
+      </button>
+    );
 
   return (
     <div>
@@ -98,6 +103,7 @@ export default function FollowButton({ viewerId, targetUserId }: FollowButtonPro
         className={`follow-button${isFollowing ? ' is-following' : ''}`}
         onClick={isFollowing ? unfollow : follow}
         disabled={working}
+        aria-label={working ? 'Loading' : undefined}
       >
         {working ? '…' : isFollowing ? 'Unfollow' : 'Follow'}
       </button>

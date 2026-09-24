@@ -14,7 +14,7 @@ export default function LegalPage() {
         ← commonplace
       </Link>
       <h1>Terms & Privacy</h1>
-      <p className="legal-page-updated">Last updated: July 2026</p>
+      <p className="legal-page-updated">Last updated: September 2026</p>
 
       <section id="terms">
         <h2>Terms of Service</h2>
@@ -23,7 +23,7 @@ export default function LegalPage() {
         <p>
           commonplace is a small, independently-run app for tracking and sharing what you
           read, watch, and listen to. Creating an account means you're agreeing to these
-          terms.
+          terms. commonplace is operated from Australia by an individual developer.
         </p>
 
         <h3>Your account</h3>
@@ -45,6 +45,12 @@ export default function LegalPage() {
           people you follow. That's part of how the app works. Check the privacy setting
           on individual items (like Want to Consume entries) if you want to keep something
           private.
+        </p>
+        <p>
+          You need to have the rights to anything you post, avatars, Journal media and
+          clips, quoted passages, and so on. If we receive a credible copyright complaint
+          about something you've posted, we'll remove it and may suspend your account.
+          Copyright complaints can be sent to zedo12@gmail.com.
         </p>
 
         <h3>Acceptable use</h3>
@@ -73,6 +79,14 @@ export default function LegalPage() {
         </p>
       </section>
 
+      <section id="refund">
+        <h2>Refunds</h2>
+        <p>
+          commonplace doesn't have any paid features, subscriptions, or purchases today, so
+          there's nothing to refund. We'll update this section if that ever changes.
+        </p>
+      </section>
+
       <section id="privacy">
         <h2>Privacy Policy</h2>
 
@@ -94,21 +108,33 @@ export default function LegalPage() {
             <strong>Vercel</strong>: hosts the app itself.
           </li>
           <li>
-            <strong>Google Books and OMDb</strong>: when you search for a book or film to
-            add to your Ledger, your search text gets sent to these services to fetch
-            results. Nothing else about your account is shared with them.
+            <strong>Google Books, OMDb, and the iTunes Search API (Apple)</strong>: when you
+            search for a book, film, or podcast to add to your Ledger, your search text
+            gets sent to these services to fetch results. Nothing else about your account
+            is shared with them.
           </li>
           <li>
             <strong>hCaptcha</strong>: used on login, signup, and password-reset forms to
             help prevent automated abuse.
           </li>
+          <li>
+            <strong>Sentry</strong>: collects crash reports, the error and technical
+            context around it, not your account data, so a one-person team can find and
+            fix bugs. We don't have session replay or performance tracing turned on.
+          </li>
+          <li>
+            <strong>Google Fonts</strong>: the app's typefaces load from Google's font CDN
+            (fonts.googleapis.com and fonts.gstatic.com), which sees your IP address when
+            those fonts load, the same as any site using Google Fonts.
+          </li>
         </ul>
 
-        <h3>Cookies and local storage</h3>
+        <h3>EU/UK visitors</h3>
         <p>
-          We use your browser's local storage for your signed-in session and your
-          light/dark mode preference, not for tracking or advertising. commonplace doesn't
-          run ads and doesn't sell data to advertisers.
+          If you're in the EU or UK: the basis for processing your data is that it's
+          needed to run the service you signed up for. You can ask for access to,
+          correction of, deletion of, or an export of your data any time by emailing
+          zedo12@gmail.com.
         </p>
 
         <h3>Your choices</h3>
@@ -124,6 +150,24 @@ export default function LegalPage() {
 
         <h3>Questions</h3>
         <p>Reach out to zedo12@gmail.com with anything about this policy or your data.</p>
+      </section>
+
+      <section id="cookies">
+        <h2>Cookies</h2>
+        <p>
+          commonplace's own code doesn't use cookies at all, it uses your browser's local
+          storage instead: for your signed-in session, and for your light/dark mode
+          preference (stored under the key <code>commonplace-theme</code>). We don't set
+          any advertising or analytics tracking cookies.
+        </p>
+        <p>
+          hCaptcha, loaded only on the login, signup, and password-reset forms, sets its
+          own cookies to help with bot and fraud detection.
+        </p>
+        <p>
+          Since the only cookies in play are for security and fraud prevention, not
+          marketing or analytics, we don't show a cookie-consent banner.
+        </p>
       </section>
     </div>
   );

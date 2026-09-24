@@ -122,21 +122,27 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
       <form className="app-form" onSubmit={handleAccountSubmit}>
         <h2>Create your account</h2>
         {error && <p className="app-form-error">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
-          required
-        />
+        <label>
+          Email
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          Password
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={6}
+            required
+          />
+        </label>
 
         <Captcha ref={captchaRef} onToken={setCaptchaToken} />
 
@@ -163,20 +169,26 @@ export default function SignUp({ onComplete, startAtProfileStep = false }: SignU
     <form className="app-form" onSubmit={handleProfileSubmit}>
       <h2>Set up your profile</h2>
       {error && <p className="app-form-error">{error}</p>}
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
+      <label>
+        Username
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+      </label>
+      <label>
+        Name
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </label>
       <button type="submit" className="app-form-submit" disabled={loading}>
         {loading ? 'Saving…' : 'Finish'}
       </button>

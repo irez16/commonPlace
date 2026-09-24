@@ -7,6 +7,7 @@ interface ProfileStatus {
   user: User | null;
   hasProfile: boolean;
   username: string | null;
+  refresh: () => void;
 }
 
 // Returns { loading, user, hasProfile, username }
@@ -17,6 +18,9 @@ export function useProfileStatus(): ProfileStatus {
   const [user, setUser] = useState<User | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,7 +66,7 @@ export function useProfileStatus(): ProfileStatus {
       isMounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [refreshKey]);
 
-  return { loading, user, hasProfile, username };
+  return { loading, user, hasProfile, username, refresh };
 }

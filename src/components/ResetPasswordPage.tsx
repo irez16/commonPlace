@@ -116,20 +116,26 @@ export default function ResetPasswordPage() {
       <form className="app-form" onSubmit={handleSubmit}>
         <h2>Set a new password</h2>
         {error && <p className="app-form-error">{error}</p>}
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        <label>
+          New password
+          <input
+            type="password"
+            placeholder="New password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          Confirm new password
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </label>
         <button type="submit" className="app-form-submit" disabled={saving}>
           {saving ? 'Saving…' : 'Set password'}
         </button>
