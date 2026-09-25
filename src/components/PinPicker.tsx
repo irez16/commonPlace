@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { LedgerEntry } from '../types';
 import './PinPicker.css';
@@ -21,6 +21,17 @@ export default function PinPicker({ userId, pinnedId, onPinnedChanged }: PinPick
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // While the sheet is open the page behind it shouldn't scroll along
+  // with the list.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
 
   const openSheet = async () => {
     setOpen(true);
@@ -67,7 +78,7 @@ export default function PinPicker({ userId, pinnedId, onPinnedChanged }: PinPick
     <>
       <button
         type="button"
-        className="pin-picker-trigger"
+        className="pin-picker-trigger hit-area"
         aria-label={pinnedId ? 'Change pinned entry' : 'Pin an entry'}
         onClick={openSheet}
       >
@@ -79,6 +90,8 @@ export default function PinPicker({ userId, pinnedId, onPinnedChanged }: PinPick
       {open && (
         <div className="pin-picker-sheet-backdrop" onClick={() => setOpen(false)}>
           <div className="pin-picker-sheet" onClick={(e) => e.stopPropagation()}>
+            {/* Visual cue only (no drag gesture): marks this as a sheet. */}
+            <div className="pin-picker-sheet-handle" aria-hidden="true" />
             <div className="pin-picker-sheet-header">
               <h3>Pin to your Ledger</h3>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close">

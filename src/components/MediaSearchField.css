@@ -11,7 +11,9 @@
 
 .media-search-results {
   position: absolute;
-  z-index: 10;
+  /* Above the tab bar (900), below the pin sheet (1000). max-height is
+     also fitted to the visible space in MediaSearchField.tsx. */
+  z-index: 950;
   left: 0;
   right: 0;
   top: calc(100% + 4px);
@@ -23,6 +25,7 @@
   background: var(--bg-raised);
   max-height: 280px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -34,9 +37,14 @@
   cursor: pointer;
 }
 
-.media-search-result:hover,
 .media-search-result.is-highlighted {
   background: var(--bg);
+}
+
+@media (hover: hover) {
+  .media-search-result:hover {
+    background: var(--bg);
+  }
 }
 
 .media-search-result-cover {
@@ -47,15 +55,29 @@
   flex-shrink: 0;
 }
 
+.media-search-result > div {
+  min-width: 0;
+}
+
+/* Long titles (subtitles, editions) are cut to two lines. */
 .media-search-result-title {
   font-family: var(--font-sans);
   font-size: 14px;
+  line-height: 1.35;
   color: var(--text);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .media-search-result-meta {
   font-family: var(--font-mono);
+  line-height: 1.3;
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
+  overflow-wrap: anywhere;
 }

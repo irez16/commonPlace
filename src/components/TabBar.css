@@ -1,15 +1,27 @@
-.tab-bar {
+/* Fixed bottom dock: the tab bar, plus the iOS install hint above it when
+   that's showing. */
+.tab-bar-dock {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 430px;
+  z-index: 900;
+  /* Only the bar and the hint card take taps, not the gap around the card. */
+  pointer-events: none;
+}
+
+.tab-bar-dock.is-hidden {
+  display: none;
+}
+
+.tab-bar {
   display: flex;
   background: var(--bg-raised);
   border-top: 1px solid var(--border);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  z-index: 900;
+  pointer-events: auto;
 }
 
 .tab-bar-item {
@@ -18,6 +30,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
+  min-height: 44px;
   color: var(--text-muted);
   text-decoration: none;
 }
@@ -30,5 +43,6 @@
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 1.3;
 }

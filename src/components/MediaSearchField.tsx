@@ -48,6 +48,8 @@ export default function MediaSearchField({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   // Bumped whenever a search starts, the person types, or a result is
   // picked. An async response only applies if the id it started with is
   // still the latest, so an older, slower search can never overwrite newer
@@ -107,6 +109,29 @@ export default function MediaSearchField({
       cancelled = true;
     };
   }, [value, mediaType]);
+
+  // Fit the dropdown into the space that's actually visible below the
+  // field, which on a phone is what's left above the on-screen keyboard
+  // (the visual viewport), so results never run under the keyboard.
+  useEffect(() => {
+    if (!listVisible) return;
+    const fit = () => {
+      const list = listRef.current;
+      const input = inputRef.current;
+      if (!list || !input) return;
+      const vv = window.visualViewport;
+      const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      const space = visibleBottom - input.getBoundingClientRect().bottom - 12;
+      list.style.maxHeight = `${Math.max(120, Math.min(280, space))}px`;
+    };
+    fit();
+    window.visualViewport?.addEventListener('resize', fit);
+    window.visualViewport?.addEventListener('scroll', fit);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', fit);
+      window.visualViewport?.removeEventListener('scroll', fit);
+    };
+  }, [listVisible]);
 
   // Keep the keyboard-highlighted option visible when arrowing past what
   // currently fits in the scrollable dropdown.
@@ -177,6 +202,7 @@ export default function MediaSearchField({
   return (
     <div className="media-search-field">
       <input
+        ref={inputRef}
         type="text"
         placeholder={placeholder ?? 'Title'}
         aria-label="Title"
@@ -209,7 +235,7 @@ export default function MediaSearchField({
       {error && <p className="app-form-error">{error}</p>}
 
       {listVisible && (
-        <ul className="media-search-results" role="listbox" id={listboxId}>
+        <ul className="media-search-results" role="listbox" id={listboxId} ref={listRef}>
           {results.map((result, i) => (
             <li
               key={result.imdbId ?? `${result.title}-${i}`}

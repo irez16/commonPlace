@@ -3,6 +3,7 @@ import { useFollowList } from '../hooks/useFollowList';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import Avatar from './Avatar';
+import PageStatus from './PageStatus';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import './FollowListPage.css';
 
@@ -11,23 +12,23 @@ export default function FollowersPage() {
   const { loading, needsAuth, error, profiles } = useFollowList('followers');
   const { username } = useProfileStatus();
 
-  if (loading) return <div className="follow-list-page"><p className="follow-list-status">Loading…</p></div>;
+  if (loading) return <PageStatus>Loading…</PageStatus>;
 
   if (needsAuth) {
     return (
       <div className="follow-list-page">
         <p className="follow-list-status">Log in to see your followers.</p>
-        <Link to="/">Go home</Link>
+        <Link to="/" className="hit-area">Go home</Link>
       </div>
     );
   }
 
-  if (error) return <div className="follow-list-page"><p className="follow-list-status" style={{ color: 'crimson' }}>{error}</p></div>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
 
   return (
     <div className="follow-list-page">
       {username && (
-        <Link className="follow-list-breadcrumb" to={`/@${username}`}>
+        <Link className="follow-list-breadcrumb hit-area" to={`/@${username}`}>
           ← @{username}
         </Link>
       )}

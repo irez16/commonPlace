@@ -13,7 +13,7 @@ export default function QuickNav() {
 
   return (
     <div className="quick-nav">
-      <Link className="quick-nav-icon" to="/notifications" aria-label="In Common notifications">
+      <Link className="quick-nav-icon hit-area" to="/notifications" aria-label="In Common notifications">
         <svg width="19" height="19">
           <use href="/icons.svg#icon-bell" />
         </svg>
@@ -21,7 +21,7 @@ export default function QuickNav() {
           <span className="quick-nav-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
         )}
       </Link>
-      <Link className="quick-nav-icon" to="/settings" aria-label="Settings">
+      <Link className="quick-nav-icon hit-area" to="/settings" aria-label="Settings">
         <svg width="19" height="19">
           <use href="/icons.svg#icon-gear" />
         </svg>

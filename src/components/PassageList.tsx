@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { resolveJournalFont } from '../lib/journalFonts';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
+import { useRefetchOnForeground } from '../hooks/useRefetchOnForeground';
 import type { Passage, LedgerEntry, Profile } from '../types';
+import ClampedText from './ClampedText';
 import './PassageList.css';
 
 interface PassageListProps {
@@ -56,9 +58,14 @@ export default function PassageList({
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchPassages = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // background: a refresh when the app returns to the foreground. The
+  // current clips stay on screen (no loading state) until the new ones
+  // arrive, and a failure keeps them rather than showing an error.
+  const fetchPassages = useCallback(async ({ background = false } = {}) => {
+    if (!background) {
+      setLoading(true);
+      setError(null);
+    }
 
     const { data, error: fetchError } = await supabase
       .from('passages')
@@ -67,32 +74,40 @@ export default function PassageList({
       .order('created_at', { ascending: false });
 
     if (fetchError) {
-      setLoading(false);
-      setError(fetchError.message);
+      if (!background) {
+        setLoading(false);
+        setError(fetchError.message);
+      }
       return;
     }
 
     const fetched = (data ?? []) as Passage[];
-    setPassages(fetched);
 
     // Two-step fetch (same pattern as useFeed/useFollowList) to resolve
     // each clip's linked ledger entry for display context.
     const entryIds = Array.from(new Set(fetched.map((p) => p.ledger_entry_id)));
     if (entryIds.length === 0) {
+      setPassages(fetched);
       setLoading(false);
+      setError(null);
       setEntryById({});
       return;
     }
+
+    // A foreground refresh swaps clips and their sources in together, so
+    // a new clip never shows without its "From" line.
+    if (!background) setPassages(fetched);
 
     const { data: entryRows, error: entryError } = await supabase
       .from('ledger_entries')
       .select('id, title, creator')
       .in('id', entryIds);
 
-    setLoading(false);
-
     if (entryError) {
-      setError(entryError.message);
+      if (!background) {
+        setLoading(false);
+        setError(entryError.message);
+      }
       return;
     }
 
@@ -100,12 +115,19 @@ export default function PassageList({
     for (const row of (entryRows ?? []) as Pick<LedgerEntry, 'id' | 'title' | 'creator'>[]) {
       map[row.id] = { title: row.title, creator: row.creator };
     }
+    if (background) {
+      setPassages(fetched);
+      setError(null);
+    }
+    setLoading(false);
     setEntryById(map);
   }, [userId]);
 
   useEffect(() => {
     fetchPassages();
   }, [fetchPassages, refreshKey]);
+
+  useRefetchOnForeground(() => fetchPassages({ background: true }));
 
   const mediaUrl = (path: string) =>
     supabase.storage.from('passage-media').getPublicUrl(path).data.publicUrl;
@@ -135,7 +157,7 @@ export default function PassageList({
   };
 
   if (loading) return <p className="passage-list-status">Loading journal…</p>;
-  if (error) return <p className="passage-list-status" style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <p className="passage-list-status text-error">{error}</p>;
   if (passages.length === 0 && onStartClipping && readOnly) {
     return (
       <div className="passage-list-empty">
@@ -143,7 +165,7 @@ export default function PassageList({
           Clips are passages you save from something in your Ledger: a line from a book, a
           moment in a film. Each one hangs off a Ledger entry.
         </p>
-        <button type="button" className="passage-list-empty-action" onClick={onStartClipping}>
+        <button type="button" className="passage-list-empty-action hit-area" onClick={onStartClipping}>
           Clip your first passage
         </button>
       </div>
@@ -183,8 +205,14 @@ export default function PassageList({
             >
               <div className="passage-card-type">{CLIP_TYPE_LABELS[passage.clip_type]}</div>
 
+              {/* Long clips are cut to a few lines here; the clip's own
+                  page (this link) shows the whole text. */}
               {passage.clip_type === 'text' && (
-                <p className="passage-card-quote">{passage.clipped_text}</p>
+                <ClampedText
+                  className="passage-card-quote"
+                  text={passage.clipped_text ?? ''}
+                  more={<span className="clamped-text-more">Read more</span>}
+                />
               )}
               {passage.clip_type === 'image' && passage.media_path && (
                 <div className="passage-card-media">
@@ -242,7 +270,7 @@ export default function PassageList({
             {!readOnly && (
               <button
                 type="button"
-                className="passage-card-delete"
+                className="passage-card-delete hit-area"
                 onClick={() => deletePassage(passage.id, passage.media_path)}
                 disabled={deletingId === passage.id}
               >

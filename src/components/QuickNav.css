@@ -1,6 +1,6 @@
 .quick-nav {
   position: fixed;
-  top: max(12px, env(safe-area-inset-top));
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -8,15 +8,16 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 0 16px;
+  /* A solid paper-coloured bar (the same height #root reserves at the
+     top) so page text scrolling up passes behind it instead of showing
+     around the icons. It also covers the status bar area on notched
+     phones. */
+  padding: max(12px, env(safe-area-inset-top)) 16px 8px;
+  background: var(--bg);
   z-index: 900;
-  /* The wrapper spans the full column width just to do the centering
-     math, but shouldn't itself intercept clicks outside the icons. */
-  pointer-events: none;
 }
 
 .quick-nav-icon {
-  pointer-events: auto;
   position: relative;
   display: flex;
   align-items: center;
@@ -33,14 +34,15 @@
   position: absolute;
   top: -3px;
   right: -3px;
-  min-width: 16px;
-  height: 16px;
+  min-width: 17px;
+  height: 17px;
   padding: 0 3px;
-  border-radius: 8px;
+  border-radius: 9px;
   background: var(--accent);
   color: var(--accent-contrast);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;

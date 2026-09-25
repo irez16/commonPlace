@@ -86,12 +86,12 @@ export default function FollowButton({ viewerId, targetUserId }: FollowButtonPro
   // Not logged in — point them to log in rather than hiding the concept
   // of following entirely.
   if (!viewerId) {
-    return <Link to="/">Log in to follow</Link>;
+    return <Link className="hit-area" to="/">Log in to follow</Link>;
   }
 
   if (loading)
     return (
-      <button type="button" className="follow-button" disabled aria-label="Loading">
+      <button type="button" className="follow-button hit-area" disabled aria-label="Loading">
         …
       </button>
     );
@@ -100,7 +100,7 @@ export default function FollowButton({ viewerId, targetUserId }: FollowButtonPro
     <div>
       <button
         type="button"
-        className={`follow-button${isFollowing ? ' is-following' : ''}`}
+        className={`follow-button hit-area${isFollowing ? ' is-following' : ''}`}
         onClick={isFollowing ? unfollow : follow}
         disabled={working}
         aria-label={working ? 'Loading' : undefined}

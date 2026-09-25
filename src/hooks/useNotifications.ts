@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { InCommonNotification, Profile } from '../types';
 import { NOTIFICATIONS_CHANGED_EVENT } from './useUnreadCount';
+import { useRefetchOnForeground } from './useRefetchOnForeground';
 
 export interface NotificationItem extends InCommonNotification {
   otherUser: {
@@ -31,15 +32,28 @@ export function useNotifications(): NotificationsState {
   const [error, setError] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  const fetchNotifications = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // background: a refresh when the app returns to the foreground. The
+  // current list stays on screen (no loading state) until the new one
+  // arrives, and a failure keeps it rather than showing an error.
+  const fetchNotifications = useCallback(async ({ background = false } = {}) => {
+    if (!background) {
+      setLoading(true);
+      setError(null);
+    }
+    const fail = (message: string) => {
+      if (background) return;
+      setLoading(false);
+      setError(message);
+    };
 
     const {
       data: { user: currentUser },
     } = await supabase.auth.getUser();
 
     if (!currentUser) {
+      // In the background this is more likely a dropped connection than a
+      // sign-out; leave the list as it is.
+      if (background) return;
       setLoading(false);
       setNeedsAuth(true);
       return;
@@ -52,8 +66,7 @@ export function useNotifications(): NotificationsState {
       .order('created_at', { ascending: false });
 
     if (fetchError) {
-      setLoading(false);
-      setError(fetchError.message);
+      fail(fetchError.message);
       return;
     }
 
@@ -61,6 +74,7 @@ export function useNotifications(): NotificationsState {
 
     if (base.length === 0) {
       setLoading(false);
+      setError(null);
       setNotifications([]);
       return;
     }
@@ -75,8 +89,7 @@ export function useNotifications(): NotificationsState {
       ]);
 
     if (profileError || passageError) {
-      setLoading(false);
-      setError(profileError?.message ?? passageError?.message ?? 'Failed to load notifications.');
+      fail(profileError?.message ?? passageError?.message ?? 'Failed to load notifications.');
       return;
     }
 
@@ -108,12 +121,13 @@ export function useNotifications(): NotificationsState {
       .select('id, title, creator')
       .in('id', entryIds.length > 0 ? entryIds : ['']);
 
-    setLoading(false);
-
     if (entryError) {
-      setError(entryError.message);
+      fail(entryError.message);
       return;
     }
+
+    setLoading(false);
+    setError(null);
 
     const entryById = new Map(
       (entryRows ?? []).map((e) => [e.id as string, e as { id: string; title: string; creator: string | null }])
@@ -147,6 +161,8 @@ export function useNotifications(): NotificationsState {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+
+  useRefetchOnForeground(() => fetchNotifications({ background: true }));
 
   const markAsRead = useCallback(async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));

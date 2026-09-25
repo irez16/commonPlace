@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import type { LedgerEntry, Profile } from '../types';
+import { useRefetchOnForeground } from './useRefetchOnForeground';
 
 export interface FeedEntry extends LedgerEntry {
   author: Pick<Profile, 'id' | 'username' | 'name' | 'avatar_url' | 'ledger_accent'>;
@@ -21,15 +22,28 @@ export function useFeed(): FeedState {
   const [entries, setEntries] = useState<FeedEntry[]>([]);
   const [viewerId, setViewerId] = useState<string | null>(null);
 
-  const fetchFeed = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // background: a refresh when the app returns to the foreground. The
+  // current feed stays on screen (no loading state) until the new one
+  // arrives, and a failure keeps it rather than showing an error.
+  const fetchFeed = useCallback(async ({ background = false } = {}) => {
+    if (!background) {
+      setLoading(true);
+      setError(null);
+    }
+    const fail = (message: string) => {
+      if (background) return;
+      setLoading(false);
+      setError(message);
+    };
 
     const {
       data: { user: currentUser },
     } = await supabase.auth.getUser();
 
     if (!currentUser) {
+      // In the background this is more likely a dropped connection than a
+      // sign-out; leave the feed as it is.
+      if (background) return;
       setLoading(false);
       setNeedsAuth(true);
       return;
@@ -44,8 +58,7 @@ export function useFeed(): FeedState {
       .eq('follower_id', currentUser.id);
 
     if (followError) {
-      setLoading(false);
-      setError(followError.message);
+      fail(followError.message);
       return;
     }
 
@@ -53,6 +66,7 @@ export function useFeed(): FeedState {
 
     if (followeeIds.length === 0) {
       setLoading(false);
+      setError(null);
       setEntries([]);
       return;
     }
@@ -68,8 +82,7 @@ export function useFeed(): FeedState {
       .order('created_at', { ascending: false });
 
     if (entryError) {
-      setLoading(false);
-      setError(entryError.message);
+      fail(entryError.message);
       return;
     }
 
@@ -77,6 +90,7 @@ export function useFeed(): FeedState {
 
     if (rows.length === 0) {
       setLoading(false);
+      setError(null);
       setEntries([]);
       return;
     }
@@ -89,12 +103,13 @@ export function useFeed(): FeedState {
       .select('id, username, name, avatar_url, ledger_accent')
       .in('id', authorIds);
 
-    setLoading(false);
-
     if (profileError) {
-      setError(profileError.message);
+      fail(profileError.message);
       return;
     }
+
+    setLoading(false);
+    setError(null);
 
     const profileById = new Map(
       (profileRows ?? []).map((p) => [p.id as string, p as Profile])
@@ -113,6 +128,8 @@ export function useFeed(): FeedState {
   useEffect(() => {
     fetchFeed();
   }, [fetchFeed]);
+
+  useRefetchOnForeground(() => fetchFeed({ background: true }));
 
   return { loading, needsAuth, error, entries, viewerId };
 }

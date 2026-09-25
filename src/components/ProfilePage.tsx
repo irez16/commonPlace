@@ -9,6 +9,7 @@ import LedgerList from './LedgerList';
 import PinPicker from './PinPicker';
 import AddWantToConsume from './AddWantToConsume';
 import WantToConsumeList from './WantToConsumeList';
+import PageStatus from './PageStatus';
 import type { Profile } from '../types';
 import './ProfilePage.css';
 
@@ -33,18 +34,18 @@ export default function ProfilePage() {
   const [ledgerRefreshKey, setLedgerRefreshKey] = useState(0);
   const [wantRefreshKey, setWantRefreshKey] = useState(0);
 
-  if (username && loading) return <p>Loading profile…</p>;
+  if (username && loading) return <PageStatus>Loading profile…</PageStatus>;
 
   if (!username || notFound) {
     return (
-      <div>
+      <PageStatus tone="info">
         <p>No profile found for {handle}.</p>
-        <Link to="/">Go home</Link>
-      </div>
+        <Link to="/" className="hit-area">Go home</Link>
+      </PageStatus>
     );
   }
 
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
   if (!profile) return null;
 
   // liveProfile lets the header (and the pin, once set) reflect an edit
@@ -84,7 +85,7 @@ export default function ProfilePage() {
           {isOwnProfile && (
             <button
               type="button"
-              className="profile-section-edit-toggle"
+              className="profile-section-edit-toggle hit-area"
               onClick={() => {
                 setFocusAddForm(false);
                 setIsEditingContent((v) => !v);
@@ -141,7 +142,7 @@ export default function ProfilePage() {
 
       <hr className="profile-divider" />
 
-      <Link className="profile-journal-link" to={`/@${displayedProfile.username}/journal`}>
+      <Link className="profile-journal-link hit-area" to={`/@${displayedProfile.username}/journal`}>
         {isOwnProfile ? 'Your Commonplace Journal' : `${displayedProfile.name}'s Commonplace Journal`}
       </Link>
     </div>

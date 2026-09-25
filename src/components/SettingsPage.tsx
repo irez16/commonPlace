@@ -10,6 +10,7 @@ import { LEDGER_ACCENT_OPTIONS, resolveLedgerAccent } from '../lib/ledgerAccent'
 import { JOURNAL_COLOR_PRESETS } from '../lib/journalColors';
 import { JOURNAL_FONT_OPTIONS, resolveJournalFont } from '../lib/journalFonts';
 import Avatar from './Avatar';
+import PageStatus from './PageStatus';
 import type { Profile } from '../types';
 import './AppForm.css';
 import './SettingsPage.css';
@@ -50,14 +51,10 @@ export default function SettingsPage() {
   }, []);
 
   if (!username) {
-    return (
-      <div className="settings-page">
-        <p>You need to be signed in to view settings.</p>
-      </div>
-    );
+    return <PageStatus tone="info">You need to be signed in to view settings.</PageStatus>;
   }
 
-  if (loading || !profile) return <div className="settings-page">Loading…</div>;
+  if (loading || !profile) return <PageStatus>Loading…</PageStatus>;
 
   const saveField = async (patch: Partial<Profile>) => {
     // Optimistic — the UI reflects the choice immediately rather than
@@ -208,7 +205,7 @@ export default function SettingsPage() {
 
   return (
     <div className="settings-page">
-      <Link className="settings-page-breadcrumb" to={`/@${username}`}>
+      <Link className="settings-page-breadcrumb hit-area" to={`/@${username}`}>
         ← @{username}
       </Link>
       <h1>Settings</h1>
@@ -246,7 +243,7 @@ export default function SettingsPage() {
             <button
               key={option}
               type="button"
-              className={`settings-toggle${theme === option ? ' is-selected' : ''}`}
+              className={`settings-toggle hit-area${theme === option ? ' is-selected' : ''}`}
               aria-pressed={theme === option}
               onClick={() => setThemePreference(option)}
             >
@@ -378,7 +375,7 @@ export default function SettingsPage() {
           <div className="settings-save-row">
             <button
               type="submit"
-              className="settings-toggle"
+              className="settings-toggle hit-area"
               disabled={passwordStatus === 'saving'}
             >
               {passwordStatus === 'saving' ? 'Updating…' : 'Update password'}
@@ -394,11 +391,11 @@ export default function SettingsPage() {
       </div>
 
       <div className="settings-section">
-        <button type="button" className="settings-logout-button" onClick={handleLogout}>
+        <button type="button" className="settings-logout-button hit-area" onClick={handleLogout}>
           Log out
         </button>
         {logoutError && <span className="settings-error">{logoutError}</span>}
-        <Link className="settings-legal-link" to="/legal">
+        <Link className="settings-legal-link hit-area" to="/legal">
           Terms & Privacy
         </Link>
       </div>

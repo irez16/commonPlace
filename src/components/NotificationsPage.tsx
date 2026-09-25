@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
 import { useProfileStatus } from '../hooks/useProfileStatus';
 import Avatar from './Avatar';
+import ClampedText from './ClampedText';
+import PageStatus from './PageStatus';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './NotificationsPage.css';
@@ -21,8 +23,8 @@ export default function NotificationsPage() {
     );
   }
 
-  if (loading) return <div className="notifications-page"><p className="notifications-status">Loading notifications…</p></div>;
-  if (error) return <div className="notifications-page"><p className="notifications-status" style={{ color: 'crimson' }}>{error}</p></div>;
+  if (loading) return <PageStatus>Loading notifications…</PageStatus>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
 
   return (
     <div className="notifications-page">
@@ -80,7 +82,24 @@ export default function NotificationsPage() {
                     :
                   </p>
 
-                  {n.clippedText && <p className="notification-quote">{n.clippedText}</p>}
+                  {/* Long clips are cut to a few lines; Read more opens
+                      the full clip (your own, in your Journal). */}
+                  {n.clippedText && (
+                    <ClampedText
+                      className="notification-quote"
+                      text={n.clippedText}
+                      more={
+                        username ? (
+                          <Link
+                            className="clamped-text-more notification-read-more hit-area"
+                            to={`/@${username}/journal/${n.my_passage_id}`}
+                          >
+                            Read more
+                          </Link>
+                        ) : null
+                      }
+                    />
+                  )}
                 </div>
               </div>
             </li>

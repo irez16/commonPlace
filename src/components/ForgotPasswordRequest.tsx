@@ -88,7 +88,7 @@ export default function ForgotPasswordRequest({ onBackToLogin }: ForgotPasswordR
       </button>
       {onBackToLogin && (
         <p className="auth-page-switch">
-          <button type="button" onClick={onBackToLogin}>
+          <button type="button" className="hit-area" onClick={onBackToLogin}>
             Back to log in
           </button>
         </p>

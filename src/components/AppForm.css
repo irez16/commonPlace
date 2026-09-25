@@ -18,6 +18,7 @@
   flex-direction: column;
   gap: 4px;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
@@ -33,7 +34,8 @@
 .app-form select,
 .app-form textarea {
   font-family: var(--font-sans);
-  font-size: 14px;
+  /* 16px or more, or iOS zooms the page when the field is focused. */
+  font-size: 16px;
   color: var(--text);
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -56,13 +58,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text);
 }
 
 .app-form-checkbox-row label {
-  display: inline;
+  /* The whole label is the tap target for the small checkbox. */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+  flex: 1;
+  gap: 8px;
+  cursor: pointer;
   text-transform: none;
   letter-spacing: normal;
   font-family: var(--font-sans);
@@ -78,6 +88,9 @@
 .app-form-radio-row label {
   flex-direction: row;
   align-items: center;
+  /* The whole label (radio + text) is the tap target. */
+  min-height: 44px;
+  cursor: pointer;
   gap: 6px;
   text-transform: capitalize;
   letter-spacing: normal;
@@ -113,6 +126,7 @@
   border-radius: 6px;
   padding: 9px 20px;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 12px;
@@ -131,11 +145,30 @@
   border-radius: 6px;
   padding: 8px 16px;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
   color: var(--text-muted);
   cursor: pointer;
+}
+
+/* Touch screens: full-height fields and buttons (44px tap targets). */
+@media (pointer: coarse) {
+  .app-form input[type='text'],
+  .app-form input[type='url'],
+  .app-form input[type='date'],
+  .app-form input[type='email'],
+  .app-form input[type='password'],
+  .app-form input[type='number'],
+  .app-form select {
+    min-height: 44px;
+  }
+
+  .app-form-submit,
+  .app-form-secondary-button {
+    min-height: 44px;
+  }
 }
 
 .app-form-subpanel {

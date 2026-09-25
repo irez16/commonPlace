@@ -26,6 +26,9 @@ export const HANGING_RIBBON = ribbonPath({ x: 322, width: 92, top: 0, bottom: 15
 export const MASKABLE_RIBBON = ribbonPath({ x: 326, width: 80, top: 48, bottom: 156, notch: 30 });
 export const MASKABLE_SCALE = 0.8;
 export const MASKABLE_CENTER = { x: 257, y: 243 };
+// Visible width of that mark (left of the "c" to right of the ribbon),
+// in 512 units, for sizing it on the iOS launch screens.
+export const MASK_MARK_WIDTH = 300;
 
 export const S = 512;
 export const TILE_RADIUS = 112;

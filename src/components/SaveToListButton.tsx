@@ -67,7 +67,7 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
 
   if (loading)
     return (
-      <button type="button" className="save-to-list-button" disabled aria-label="Loading">
+      <button type="button" className="save-to-list-button hit-area" disabled aria-label="Loading">
         …
       </button>
     );
@@ -76,7 +76,7 @@ export default function SaveToListButton({ viewerId, entry }: SaveToListButtonPr
     <div>
       <button
         type="button"
-        className={`save-to-list-button${isSaved ? ' is-saved' : ''}`}
+        className={`save-to-list-button hit-area${isSaved ? ' is-saved' : ''}`}
         onClick={save}
         disabled={isSaved || working}
         aria-label={working ? 'Loading' : undefined}

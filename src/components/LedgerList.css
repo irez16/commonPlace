@@ -1,25 +1,4 @@
-/* Contained nested-scroll: the Ledger has its own internal scroll area
-   with a fixed max height, rather than growing the whole page. A fade
-   gradient at the bottom cues "there's more below" without a hard cut. */
-.ledger-scroll-area {
-  position: relative;
-  max-height: 420px;
-  overflow-y: auto;
-}
-
-.ledger-scroll-area::after {
-  content: '';
-  position: sticky;
-  display: block;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 32px;
-  margin-top: -32px;
-  background: linear-gradient(to bottom, transparent, var(--bg));
-  pointer-events: none;
-}
-
+/* The Ledger flows in the page's own scroll (no inner scroll box). */
 .ledger-list {
   list-style: none;
   margin: 0;
@@ -40,12 +19,15 @@
   text-decoration: none;
 }
 
-.ledger-card-link-wrapper:hover {
-  text-decoration: none;
+@media (hover: hover) {
+  .ledger-card-link-wrapper:hover {
+    text-decoration: none;
+  }
 }
 
 .ledger-card-meta {
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 11px;
@@ -67,6 +49,7 @@
   font-size: 19px;
   color: var(--text);
   margin: 0 0 2px;
+  overflow-wrap: anywhere;
 }
 
 .ledger-card-creator {
@@ -74,6 +57,7 @@
   font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 8px;
+  overflow-wrap: anywhere;
 }
 
 .ledger-card-note {
@@ -83,6 +67,7 @@
   line-height: 1.5;
   color: var(--text);
   margin: 0 0 8px;
+  overflow-wrap: anywhere;
   /* Character-count truncation is applied via JS (clamped string), this
      is just a visual backstop in case a short untruncated note still
      wraps past two lines. */
@@ -93,18 +78,23 @@
 }
 
 .ledger-card-link {
+  display: inline-block;
+  margin-top: 4px;
   font-family: var(--font-sans);
   font-size: 13px;
 }
 
 .ledger-card-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 6px;
+  gap: 20px;
+  /* Room for each control's 44px tap area without overlapping the
+     View source link above. */
+  margin-top: 14px;
 }
 
 .ledger-card-actions button {
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
@@ -115,8 +105,10 @@
   cursor: pointer;
 }
 
-.ledger-card-actions button:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .ledger-card-actions button:hover {
+    color: var(--accent);
+  }
 }
 
 .ledger-empty-state {
@@ -132,6 +124,7 @@
   border-radius: 6px;
   padding: 8px 14px;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;

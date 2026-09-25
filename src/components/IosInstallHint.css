@@ -1,0 +1,55 @@
+.ios-install-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 12px 8px;
+  padding: 0 0 0 14px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+
+/* Login screen: no tab bar, so it sits on the bottom edge itself. */
+.ios-install-hint.is-floating {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 406px;
+  margin: 0;
+  z-index: 900;
+}
+
+.ios-install-hint-text {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.ios-install-hint-share {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-left: 4px;
+  color: var(--accent);
+}
+
+.ios-install-hint-close {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+}

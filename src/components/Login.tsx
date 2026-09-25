@@ -73,7 +73,7 @@ export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }
       <Captcha ref={captchaRef} onToken={setCaptchaToken} />
 
       {onForgotPassword && (
-        <button type="button" className="auth-page-forgot-link" onClick={onForgotPassword}>
+        <button type="button" className="auth-page-forgot-link hit-area" onClick={onForgotPassword}>
           Forgot password?
         </button>
       )}
@@ -85,7 +85,7 @@ export default function Login({ onComplete, onSwitchToSignUp, onForgotPassword }
       {onSwitchToSignUp && (
         <p className="auth-page-switch">
           Don't have an account?{' '}
-          <button type="button" onClick={onSwitchToSignUp}>
+          <button type="button" className="hit-area" onClick={onSwitchToSignUp}>
             Sign up
           </button>
         </p>

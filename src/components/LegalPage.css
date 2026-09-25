@@ -6,6 +6,7 @@
 .legal-page-breadcrumb {
   display: block;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;
@@ -19,6 +20,7 @@
 
 .legal-page-updated {
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 11px;

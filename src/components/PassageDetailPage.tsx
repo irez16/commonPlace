@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { resolveJournalFont } from '../lib/journalFonts';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import type { Passage } from '../types';
+import PageStatus from './PageStatus';
 import './AppForm.css';
 import './PassageList.css';
 import './PassageDetailPage.css';
@@ -94,9 +95,9 @@ export default function PassageDetailPage() {
   const mediaUrl = (path: string) =>
     supabase.storage.from('passage-media').getPublicUrl(path).data.publicUrl;
 
-  if (loading) return <p className="passage-list-status">Loading…</p>;
-  if (error) return <p className="passage-list-status" style={{ color: 'crimson' }}>{error}</p>;
-  if (notFound || !passage || !profile) return <p className="passage-list-status">Clip not found.</p>;
+  if (loading) return <PageStatus>Loading…</PageStatus>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
+  if (notFound || !passage || !profile) return <PageStatus tone="info">Clip not found.</PageStatus>;
 
   const currentIndex = siblingIds.indexOf(passage.id);
   const prevId = currentIndex >= 0 && currentIndex < siblingIds.length - 1 ? siblingIds[currentIndex + 1] : null;
@@ -109,7 +110,7 @@ export default function PassageDetailPage() {
 
   return (
     <div className="passage-detail-page">
-      <Link className="passage-detail-breadcrumb" to={`/@${username}/journal`}>
+      <Link className="passage-detail-breadcrumb hit-area" to={`/@${username}/journal`}>
         ← Journal
       </Link>
 

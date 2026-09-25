@@ -4,6 +4,8 @@ import { useProfileStatus } from '../hooks/useProfileStatus';
 import SignUp from './SignUp';
 import Login from './Login';
 import ForgotPasswordRequest from './ForgotPasswordRequest';
+import IosInstallHint from './IosInstallHint';
+import PageStatus from './PageStatus';
 import './AppForm.css';
 import './AuthPage.css';
 
@@ -23,19 +25,21 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showLoadError]);
 
-  if (loading) return <p className="auth-page-hint">Loading…</p>;
+  if (loading) return <PageStatus>Loading…</PageStatus>;
 
   // Not logged in at all → show login, signup, or the forgot-password
-  // request form, toggling between them.
+  // request form, toggling between them. The iOS install hint shows on
+  // all three (it only ever appears in iOS Safari, outside the app).
   if (!user) {
     if (authView === 'signup') {
       return (
         <div className="auth-page">
+          <IosInstallHint floating />
           <div className="auth-page-wordmark">commonplace</div>
           <SignUp onComplete={refresh} />
           <p className="auth-page-switch">
             Already have an account?{' '}
-            <button type="button" onClick={() => setAuthView('login')}>
+            <button type="button" className="hit-area" onClick={() => setAuthView('login')}>
               Log in
             </button>
           </p>
@@ -45,6 +49,7 @@ export default function Dashboard() {
     if (authView === 'forgot') {
       return (
         <div className="auth-page">
+          <IosInstallHint floating />
           <div className="auth-page-wordmark">commonplace</div>
           <ForgotPasswordRequest onBackToLogin={() => setAuthView('login')} />
         </div>
@@ -52,6 +57,7 @@ export default function Dashboard() {
     }
     return (
       <div className="auth-page">
+        <IosInstallHint floating />
         <div className="auth-page-wordmark">commonplace</div>
         <Login
           onComplete={refresh}

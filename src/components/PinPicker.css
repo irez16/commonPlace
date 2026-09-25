@@ -25,16 +25,29 @@
   background: var(--bg-raised);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  padding: 16px 20px 28px;
+  padding: 8px 20px calc(28px + env(safe-area-inset-bottom));
   max-height: 70vh;
-  overflow-y: auto;
+  max-height: 70dvh;
+  /* Header stays put at the top; only the entry list scrolls. */
+  display: flex;
+  flex-direction: column;
+}
+
+.pin-picker-sheet-handle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 0 auto 8px;
 }
 
 .pin-picker-sheet-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .pin-picker-sheet-header h3 {
@@ -51,10 +64,16 @@
   color: var(--text-muted);
   font-size: 16px;
   cursor: pointer;
-  padding: 4px;
+  /* 44px tap target; the negative margin keeps the ✕ lined up with the
+     sheet's right edge. */
+  width: 44px;
+  height: 44px;
+  margin-right: -12px;
+  padding: 0;
 }
 
 .pin-picker-error {
+  flex-shrink: 0;
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--accent);
@@ -64,6 +83,10 @@
 .pin-picker-options {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .pin-picker-option {
@@ -74,6 +97,7 @@
   background: none;
   border: none;
   border-bottom: 1px solid var(--border);
+  min-height: 48px;
   padding: 12px 4px;
   text-align: left;
   cursor: pointer;
@@ -96,6 +120,8 @@
 }
 
 .pin-picker-clear {
+  flex-shrink: 0;
+  min-height: 44px;
   margin-top: 14px;
   width: 100%;
   background: none;
@@ -103,6 +129,7 @@
   border-radius: 6px;
   padding: 10px;
   font-family: var(--font-mono);
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 12px;

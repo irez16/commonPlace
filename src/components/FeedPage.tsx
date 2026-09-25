@@ -19,7 +19,7 @@ function PeopleResults({ search }: { search: ReturnType<typeof usePeopleSearch> 
   if (search.loading) return <p className="feed-status">Searching…</p>;
   if (search.error) {
     return (
-      <p className="feed-status" style={{ color: 'crimson' }}>
+      <p className="feed-status text-error">
         {search.error}
       </p>
     );
@@ -89,13 +89,13 @@ export default function FeedPage() {
       ) : loading ? (
         <p className="feed-status">Loading feed…</p>
       ) : error ? (
-        <p className="feed-status" style={{ color: 'crimson' }}>{error}</p>
+        <p className="feed-status text-error">{error}</p>
       ) : entries.length === 0 ? (
         <div className="feed-empty">
           <p className="feed-status">Your Feed shows what people you follow log.</p>
           <button
             type="button"
-            className="feed-empty-action"
+            className="feed-empty-action hit-area"
             onClick={() => searchInputRef.current?.focus()}
           >
             Find people
@@ -139,7 +139,7 @@ export default function FeedPage() {
                   {viewerId && <SaveToListButton viewerId={viewerId} entry={entry} />}
                   {entry.url && (
                     <a
-                      className="feed-card-link"
+                      className="feed-card-link hit-area"
                       href={entry.url}
                       target="_blank"
                       rel="noreferrer"

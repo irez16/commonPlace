@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { resolveLedgerAccent } from '../lib/ledgerAccent';
 import type { LedgerEntry } from '../types';
 import { MEDIA_TYPE_LABELS } from '../types';
+import PageStatus from './PageStatus';
 import './LedgerEntryDetailPage.css';
 
 function formatConsumedDate(dateStr: string): string {
@@ -60,9 +61,9 @@ export default function LedgerEntryDetailPage() {
     fetchEntry();
   }, [fetchEntry]);
 
-  if (loading) return <p className="ledger-detail-status">Loading…</p>;
-  if (error) return <p className="ledger-detail-status" style={{ color: 'crimson' }}>{error}</p>;
-  if (notFound || !entry) return <p className="ledger-detail-status">Entry not found.</p>;
+  if (loading) return <PageStatus>Loading…</PageStatus>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
+  if (notFound || !entry) return <PageStatus tone="info">Entry not found.</PageStatus>;
 
   const pageStyle: CSSProperties & Record<string, string> = {
     '--ledger-accent': resolveLedgerAccent(profile?.ledger_accent),
@@ -70,7 +71,7 @@ export default function LedgerEntryDetailPage() {
 
   return (
     <div className="ledger-detail-page" style={pageStyle}>
-      <Link className="ledger-detail-back" to={username ? `/@${username}` : '/'}>
+      <Link className="ledger-detail-back hit-area" to={username ? `/@${username}` : '/'}>
         ← {profile ? profile.name : 'Back to profile'}
       </Link>
 
@@ -92,7 +93,7 @@ export default function LedgerEntryDetailPage() {
       {entry.note && <p className="ledger-detail-note">{entry.note}</p>}
 
       {entry.url && (
-        <a className="ledger-detail-link" href={entry.url} target="_blank" rel="noreferrer">
+        <a className="ledger-detail-link hit-area" href={entry.url} target="_blank" rel="noreferrer">
           View source
         </a>
       )}

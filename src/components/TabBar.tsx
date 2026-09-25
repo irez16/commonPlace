@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useProfileStatus } from '../hooks/useProfileStatus';
+import { useTextEntryFocused } from '../hooks/useTextEntryFocused';
+import IosInstallHint from './IosInstallHint';
 import './TabBar.css';
 
 interface TabBarItem {
@@ -18,6 +20,9 @@ interface TabBarItem {
 // to navigate to yet if they haven't finished onboarding.
 export default function TabBar() {
   const { username } = useProfileStatus();
+  // On a phone the keyboard pushes fixed bottom chrome up over the field
+  // being typed in, so the bar steps aside while a text field has focus.
+  const typing = useTextEntryFocused();
 
   if (!username) return null;
 
@@ -39,24 +44,27 @@ export default function TabBar() {
   ];
 
   return (
-    <nav className="tab-bar">
-      {items.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          className={({ isActive }) => `tab-bar-item${isActive ? ' is-active' : ''}`}
-        >
-          {({ isActive }) => (
-            <>
-              <svg width="22" height="22">
-                <use href={`/icons.svg#${isActive ? item.iconSolid : item.iconOutline}`} />
-              </svg>
-              <span className="tab-bar-item-label">{item.label}</span>
-            </>
-          )}
-        </NavLink>
-      ))}
-    </nav>
+    <div className={`tab-bar-dock${typing ? ' is-hidden' : ''}`}>
+      <IosInstallHint />
+      <nav className="tab-bar">
+        {items.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `tab-bar-item${isActive ? ' is-active' : ''}`}
+          >
+            {({ isActive }) => (
+              <>
+                <svg width="22" height="22">
+                  <use href={`/icons.svg#${isActive ? item.iconSolid : item.iconOutline}`} />
+                </svg>
+                <span className="tab-bar-item-label">{item.label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
   );
 }

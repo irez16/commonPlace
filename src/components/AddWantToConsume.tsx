@@ -145,13 +145,17 @@ export default function AddWantToConsume({ userId, onAdded }: AddWantToConsumePr
       />
 
       <div className="app-form-checkbox-row">
-        <input
-          id="is-public"
-          type="checkbox"
-          checked={isPublic}
-          onChange={(e) => setIsPublic(e.target.checked)}
-        />
-        <label htmlFor="is-public">Public (visible on your profile)</label>
+        {/* The checkbox sits inside its label so the whole row is the
+            tap target, not just the small box. */}
+        <label htmlFor="is-public">
+          <input
+            id="is-public"
+            type="checkbox"
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+          />
+          Public (visible on your profile)
+        </label>
       </div>
 
       <button type="submit" className="app-form-submit" disabled={loading}>

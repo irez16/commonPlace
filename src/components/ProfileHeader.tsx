@@ -62,7 +62,7 @@ export default function ProfileHeader({
   };
 
   const shareButton = (
-    <button type="button" className="profile-header-button" onClick={shareProfile}>
+    <button type="button" className="profile-header-button hit-area" onClick={shareProfile}>
       {shareState === 'copied' ? 'Link copied' : 'Share profile'}
     </button>
   );
@@ -159,7 +159,7 @@ export default function ProfileHeader({
         <div className="profile-header-form-actions">
           <button
             type="button"
-            className="profile-header-button"
+            className="profile-header-button hit-area"
             onClick={saveEdit}
             disabled={saving}
           >
@@ -167,7 +167,7 @@ export default function ProfileHeader({
           </button>
           <button
             type="button"
-            className="profile-header-button"
+            className="profile-header-button hit-area"
             onClick={cancelEdit}
             disabled={saving}
           >
@@ -199,16 +199,16 @@ export default function ProfileHeader({
         {isOwnProfile ? (
           <>
             <div className="profile-header-counts">
-              <Link to="/following">
+              <Link className="hit-area" to="/following">
                 Following{!countsLoading && ` (${followingCount})`}
             </Link>
             <span>·</span>
-            <Link to="/followers">
+            <Link className="hit-area" to="/followers">
               Followers{!countsLoading && ` (${followerCount})`}
             </Link>
           </div>
           <div className="profile-header-actions">
-            <button type="button" className="profile-header-button" onClick={startEdit}>
+            <button type="button" className="profile-header-button hit-area" onClick={startEdit}>
               Edit profile
             </button>
             {shareButton}

@@ -4,6 +4,7 @@ import { usePublicProfile } from '../hooks/usePublicProfile';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import AddPassage from './AddPassage';
 import PassageList from './PassageList';
+import PageStatus from './PageStatus';
 import './JournalPage.css';
 
 export default function JournalPage() {
@@ -20,25 +21,25 @@ export default function JournalPage() {
   const [focusAddForm, setFocusAddForm] = useState(false);
   const [journalRefreshKey, setJournalRefreshKey] = useState(0);
 
-  if (username && loading) return <p className="journal-page-status">Loading journal…</p>;
+  if (username && loading) return <PageStatus>Loading journal…</PageStatus>;
 
   if (!username || notFound) {
     return (
-      <div className="journal-page">
-        <p className="journal-page-status">No profile found for {handle}.</p>
-        <Link to="/">Go home</Link>
-      </div>
+      <PageStatus tone="info">
+        <p>No profile found for {handle}.</p>
+        <Link to="/" className="hit-area">Go home</Link>
+      </PageStatus>
     );
   }
 
-  if (error) return <p className="journal-page-status" style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <PageStatus tone="error">{error}</PageStatus>;
   if (!profile) return null;
 
   const contentEditable = isOwnProfile && isEditingContent;
 
   return (
     <div className="journal-page">
-      <Link className="journal-page-breadcrumb" to={`/@${profile.username}`}>
+      <Link className="journal-page-breadcrumb hit-area" to={`/@${profile.username}`}>
         ← @{profile.username}
       </Link>
 
@@ -47,7 +48,7 @@ export default function JournalPage() {
         {isOwnProfile && (
           <button
             type="button"
-            className="journal-page-edit-toggle"
+            className="journal-page-edit-toggle hit-area"
             onClick={() => {
               setFocusAddForm(false);
               setIsEditingContent((v) => !v);

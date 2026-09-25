@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { MEDIA_TYPES, MEDIA_TYPE_LABELS } from '../types';
 import type { MediaType, LedgerEntry } from '../types';
 import { truncateNote } from '../lib/text';
+import { useRefetchOnForeground } from '../hooks/useRefetchOnForeground';
 import './AppForm.css';
 import './LedgerList.css';
 
@@ -59,9 +60,14 @@ export default function LedgerList({
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchEntries = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // background: a refresh when the app returns to the foreground. The
+  // current entries stay on screen (no loading state), and a failure keeps
+  // them rather than replacing the list with an error.
+  const fetchEntries = useCallback(async ({ background = false } = {}) => {
+    if (!background) {
+      setLoading(true);
+      setError(null);
+    }
 
     const { data, error: fetchError } = await supabase
       .from('ledger_entries')
@@ -70,19 +76,22 @@ export default function LedgerList({
       .order('consumed_date', { ascending: false })
       .order('created_at', { ascending: false });
 
-    setLoading(false);
+    if (!background) setLoading(false);
 
     if (fetchError) {
-      setError(fetchError.message);
+      if (!background) setError(fetchError.message);
       return;
     }
 
+    if (background) setError(null);
     setEntries(data as LedgerEntry[]);
   }, [userId]);
 
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries, refreshKey]);
+
+  useRefetchOnForeground(() => fetchEntries({ background: true }));
 
   // Pinned entry (if present) always sorts first; everything else stays
   // reverse-chronological by consumed date.
@@ -175,7 +184,7 @@ export default function LedgerList({
   };
 
   if (loading) return <p className="ledger-loading">Loading {readOnly ? 'ledger' : 'your ledger'}…</p>;
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <p className="ledger-empty text-error">{error}</p>;
   if (entries.length === 0 && onAddFirst) {
     // Already in edit mode, the add form is right above this list.
     if (!readOnly) return <p className="ledger-empty">Add your first entry above.</p>;
@@ -184,7 +193,7 @@ export default function LedgerList({
         <p className="ledger-empty">
           Your Ledger is empty. Log what you're reading, watching, or listening to.
         </p>
-        <button type="button" className="ledger-empty-action" onClick={onAddFirst}>
+        <button type="button" className="ledger-empty-action hit-area" onClick={onAddFirst}>
           Add your first entry
         </button>
       </div>
@@ -195,143 +204,142 @@ export default function LedgerList({
   }
 
   return (
-    <div className="ledger-scroll-area">
-      <ul className="ledger-list">
-        {orderedEntries.map((entry) => {
-          const isEditing = !readOnly && editingId === entry.id;
-          const isPinned = pinnedId === entry.id;
+    <ul className="ledger-list">
+      {orderedEntries.map((entry) => {
+        const isEditing = !readOnly && editingId === entry.id;
+        const isPinned = pinnedId === entry.id;
 
-          if (isEditing && editDraft) {
-            return (
-              <li key={entry.id} className="app-form">
-                <select
-                  value={editDraft.media_type}
-                  onChange={(e) =>
-                    setEditDraft((d) => d && { ...d, media_type: e.target.value as MediaType })
-                  }
-                >
-                  {MEDIA_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={editDraft.title}
-                  onChange={(e) => setEditDraft((d) => d && { ...d, title: e.target.value })}
-                  placeholder="Title"
-                />
-                <input
-                  type="text"
-                  value={editDraft.creator}
-                  onChange={(e) => setEditDraft((d) => d && { ...d, creator: e.target.value })}
-                  placeholder="Author / director / host"
-                />
-                <input
-                  type="url"
-                  value={editDraft.url}
-                  onChange={(e) => setEditDraft((d) => d && { ...d, url: e.target.value })}
-                  placeholder="Link"
-                />
-                <input
-                  type="date"
-                  value={editDraft.consumed_date}
-                  onChange={(e) =>
-                    setEditDraft((d) => d && { ...d, consumed_date: e.target.value })
-                  }
-                />
-                <select
-                  value={editDraft.rating}
-                  onChange={(e) => setEditDraft((d) => d && { ...d, rating: e.target.value })}
-                >
-                  <option value="">No rating</option>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <textarea
-                  value={editDraft.note}
-                  onChange={(e) => setEditDraft((d) => d && { ...d, note: e.target.value })}
-                  placeholder="Note"
-                  rows={2}
-                />
-                <div className="app-form-actions">
-                  <button
-                    type="button"
-                    className="app-form-submit"
-                    onClick={() => saveEdit(entry.id)}
-                    disabled={savingId === entry.id}
-                  >
-                    {savingId === entry.id ? 'Saving…' : 'Save'}
-                  </button>
-                  <button type="button" className="app-form-secondary-button" onClick={cancelEdit}>
-                    Cancel
-                  </button>
-                </div>
-              </li>
-            );
-          }
-
+        if (isEditing && editDraft) {
           return (
-            <li key={entry.id} className="ledger-card">
-              <Link className="ledger-card-link-wrapper" to={`/@${username}/ledger/${entry.id}`}>
-                <div className="ledger-card-meta">
-                  {isPinned && (
-                    <span className="ledger-card-pin-flag" aria-label="Pinned">
-                      <svg width="12" height="12">
-                        <use href="/icons.svg#pin-solid" />
-                      </svg>
-                    </span>
-                  )}
-                  <span>{MEDIA_TYPE_LABELS[entry.media_type]}</span>
-                  <span>·</span>
-                  <span>{formatConsumedDate(entry.consumed_date)}</span>
-                  {entry.rating && (
-                    <>
-                      <span>·</span>
-                      <span>{entry.rating}/5</span>
-                    </>
-                  )}
-                </div>
-
-                <h3 className="ledger-card-title">{entry.title}</h3>
-                {entry.creator && <div className="ledger-card-creator">{entry.creator}</div>}
-
-                {entry.note && <p className="ledger-card-note">{truncateNote(entry.note)}</p>}
-              </Link>
-
-              {entry.url && (
-                <a
-                  className="ledger-card-link"
-                  href={entry.url}
-                  target="_blank"
-                  rel="noreferrer"
+            <li key={entry.id} className="app-form">
+              <select
+                value={editDraft.media_type}
+                onChange={(e) =>
+                  setEditDraft((d) => d && { ...d, media_type: e.target.value as MediaType })
+                }
+              >
+                {MEDIA_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={editDraft.title}
+                onChange={(e) => setEditDraft((d) => d && { ...d, title: e.target.value })}
+                placeholder="Title"
+              />
+              <input
+                type="text"
+                value={editDraft.creator}
+                onChange={(e) => setEditDraft((d) => d && { ...d, creator: e.target.value })}
+                placeholder="Author / director / host"
+              />
+              <input
+                type="url"
+                value={editDraft.url}
+                onChange={(e) => setEditDraft((d) => d && { ...d, url: e.target.value })}
+                placeholder="Link"
+              />
+              <input
+                type="date"
+                value={editDraft.consumed_date}
+                onChange={(e) =>
+                  setEditDraft((d) => d && { ...d, consumed_date: e.target.value })
+                }
+              />
+              <select
+                value={editDraft.rating}
+                onChange={(e) => setEditDraft((d) => d && { ...d, rating: e.target.value })}
+              >
+                <option value="">No rating</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={editDraft.note}
+                onChange={(e) => setEditDraft((d) => d && { ...d, note: e.target.value })}
+                placeholder="Note"
+                rows={2}
+              />
+              <div className="app-form-actions">
+                <button
+                  type="button"
+                  className="app-form-submit"
+                  onClick={() => saveEdit(entry.id)}
+                  disabled={savingId === entry.id}
                 >
-                  View source
-                </a>
-              )}
-
-              {!readOnly && (
-                <div className="ledger-card-actions">
-                  <button type="button" onClick={() => startEdit(entry)}>
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteEntry(entry.id)}
-                    disabled={deletingId === entry.id}
-                  >
-                    {deletingId === entry.id ? 'Deleting…' : 'Delete'}
-                  </button>
-                </div>
-              )}
+                  {savingId === entry.id ? 'Saving…' : 'Save'}
+                </button>
+                <button type="button" className="app-form-secondary-button" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </div>
             </li>
           );
-        })}
-      </ul>
-    </div>
+        }
+
+        return (
+          <li key={entry.id} className="ledger-card">
+            <Link className="ledger-card-link-wrapper" to={`/@${username}/ledger/${entry.id}`}>
+              <div className="ledger-card-meta">
+                {isPinned && (
+                  <span className="ledger-card-pin-flag" aria-label="Pinned">
+                    <svg width="12" height="12">
+                      <use href="/icons.svg#pin-solid" />
+                    </svg>
+                  </span>
+                )}
+                <span>{MEDIA_TYPE_LABELS[entry.media_type]}</span>
+                <span>·</span>
+                <span>{formatConsumedDate(entry.consumed_date)}</span>
+                {entry.rating && (
+                  <>
+                    <span>·</span>
+                    <span>{entry.rating}/5</span>
+                  </>
+                )}
+              </div>
+
+              <h3 className="ledger-card-title">{entry.title}</h3>
+              {entry.creator && <div className="ledger-card-creator">{entry.creator}</div>}
+
+              {entry.note && <p className="ledger-card-note">{truncateNote(entry.note)}</p>}
+            </Link>
+
+            {entry.url && (
+              <a
+                className="ledger-card-link hit-area"
+                href={entry.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View source
+              </a>
+            )}
+
+            {!readOnly && (
+              <div className="ledger-card-actions">
+                <button type="button" className="hit-area" onClick={() => startEdit(entry)}>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="hit-area"
+                  onClick={() => deleteEntry(entry.id)}
+                  disabled={deletingId === entry.id}
+                >
+                  {deletingId === entry.id ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }

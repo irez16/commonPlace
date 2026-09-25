@@ -10,7 +10,7 @@ export default function LegalPage() {
 
   return (
     <div className="legal-page">
-      <Link className="legal-page-breadcrumb" to="/">
+      <Link className="legal-page-breadcrumb hit-area" to="/">
         ← commonplace
       </Link>
       <h1>Terms & Privacy</h1>
@@ -162,9 +162,11 @@ export default function LegalPage() {
         <h2>Cookies</h2>
         <p>
           commonplace's own code doesn't use cookies at all, it uses your browser's local
-          storage instead: for your signed-in session, and for your light/dark mode
-          preference (stored under the key <code>commonplace-theme</code>). We don't set
-          any advertising or analytics tracking cookies.
+          storage instead: for your signed-in session, for your light/dark mode
+          preference (stored under the key <code>commonplace-theme</code>), and, in Safari
+          on iPhone and iPad, to remember that you've dismissed the Add to Home Screen tip
+          (stored under the key <code>commonplace-ios-install-hint-dismissed</code>). We
+          don't set any advertising or analytics tracking cookies.
         </p>
         <p>
           hCaptcha, loaded only on the login, signup, and password-reset forms, sets its

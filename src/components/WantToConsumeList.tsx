@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useRefetchOnForeground } from '../hooks/useRefetchOnForeground';
 import type { WantToConsumeItem } from '../types';
 import './WantToConsumeList.css';
 
@@ -39,9 +40,13 @@ export default function WantToConsumeList({
     note: '',
   });
 
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // background: a refresh when the app returns to the foreground; keeps
+  // the current list on screen and ignores a failure (see LedgerList).
+  const fetchItems = useCallback(async ({ background = false } = {}) => {
+    if (!background) {
+      setLoading(true);
+      setError(null);
+    }
 
     const { data, error: fetchError } = await supabase
       .from('want_to_consume')
@@ -49,12 +54,14 @@ export default function WantToConsumeList({
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    setLoading(false);
+    if (!background) setLoading(false);
 
     if (fetchError) {
-      setError(fetchError.message);
+      if (!background) setError(fetchError.message);
       return;
     }
+
+    if (background) setError(null);
 
     const fetched = data as WantToConsumeItem[];
     // Public profile view: only ever show public items, even if the viewer
@@ -66,6 +73,8 @@ export default function WantToConsumeList({
   useEffect(() => {
     fetchItems();
   }, [fetchItems, refreshKey]);
+
+  useRefetchOnForeground(() => fetchItems({ background: true }));
 
   // Reset the expanded ("see all") state whenever we switch in or out of
   // edit mode, so leaving edit mode doesn't leave a stale expanded list.
@@ -152,7 +161,7 @@ export default function WantToConsumeList({
   };
 
   if (loading) return <p className="wtc-empty">Loading {readOnly ? 'list' : 'your list'}…</p>;
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <p className="wtc-empty text-error">{error}</p>;
   if (items.length === 0) {
     return <p className="wtc-empty">Nothing on {readOnly ? 'the' : 'your'} Want to Consume list yet.</p>;
   }
@@ -204,12 +213,13 @@ export default function WantToConsumeList({
                 <div className="wtc-row-actions">
                   <button
                     type="button"
+                    className="hit-area"
                     onClick={() => confirmPromote(item)}
                     disabled={promotingId === item.id}
                   >
                     {promotingId === item.id ? 'Adding…' : 'Add to ledger'}
                   </button>
-                  <button type="button" onClick={cancelPromote}>
+                  <button type="button" className="hit-area" onClick={cancelPromote}>
                     Cancel
                   </button>
                 </div>
@@ -232,11 +242,12 @@ export default function WantToConsumeList({
 
               {readOnly ? null : (
                 <div className="wtc-row-actions">
-                  <button type="button" onClick={() => openPromoteForm(item)}>
+                  <button type="button" className="hit-area" onClick={() => openPromoteForm(item)}>
                     Consumed
                   </button>
                   <button
                     type="button"
+                    className="hit-area"
                     onClick={() => deleteItem(item.id)}
                     disabled={deletingId === item.id}
                   >
@@ -249,7 +260,7 @@ export default function WantToConsumeList({
         })}
       </ul>
       {readOnly && !expanded && items.length > PREVIEW_SIZE && (
-        <button type="button" className="wtc-see-all" onClick={() => setExpanded(true)}>
+        <button type="button" className="wtc-see-all hit-area" onClick={() => setExpanded(true)}>
           See all ({items.length})
         </button>
       )}
